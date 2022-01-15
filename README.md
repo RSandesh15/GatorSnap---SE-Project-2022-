@@ -12,6 +12,7 @@ Expressive online photo galleries are the new way of creative expression, allowi
 The tech stack currently in use for developing this web application are:
 1. React.js
 2. Golang
+3. MongoDB
 
 Team Members:
 1. Rishab Parmar
