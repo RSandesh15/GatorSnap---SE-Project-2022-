@@ -38,11 +38,19 @@ func GetAllImages(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 
 func getGenresOfImage(DB *gorm.DB, w http.ResponseWriter, imageId int) ([]string, error) {
 	var genres []string
-	var allGenres []models.Genre
-	err := DB.Find(&allGenres).Where("ImageId = ?", imageId).Select("GenreType").Error
+	var genre []models.Genre
+	// Another way of finding data:
+	// genresOfCurrentImage := DB.Where("image_id = ?", strconv.Itoa(imageId)).Find(&genre)
+	genresOfCurrentImage := DB.Where(&models.Genre{ImageId: imageId}).Find(&genre)
+	genreRows, err := genresOfCurrentImage.Rows()
 	if err != nil {
 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return genres, err
+	}
+	var currentGenre models.Genre
+	for genreRows.Next() {
+		DB.ScanRows(genreRows, &currentGenre)
+		genres = append(genres, currentGenre.GenreType)
 	}
 	return genres, nil
 }

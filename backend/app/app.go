@@ -55,9 +55,9 @@ func (a *App) insertImage() {
 		// lastInsertedImageId := lastImage.ImageId
 		// // Loop for all the available genres passed from the front end
 		if a.DB.Create(&models.Genre{
+			ImageId: x + 1,
 			GenreType: "nature",
 			// ImageId: lastInsertedImageId,
-			ImageId: x + 1,
 		}).Error != nil {
 			// handler.SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Genre Schema")
 			return
