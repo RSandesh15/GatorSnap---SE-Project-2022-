@@ -5,8 +5,8 @@ import (
 )
 
 type Image struct {
-	EmailId     string `gorm:"primary_key"`
-	ImageId     int
+	EmailId     string
+	ImageId     int    `gorm:"primaryKey"`
 	Title       string
 	Description string
 	Price       float32

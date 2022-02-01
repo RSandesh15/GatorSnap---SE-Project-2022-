@@ -26,25 +26,43 @@ func (a *App) InitializeApplication() {
 	a.DB = db
 	a.migrateSchemas()
 	a.setRouters()
-	a.insertDummyData()
+	// Set the request and response parameters for insertImage()
+	a.insertImage()
 }
 
-func (a *App) insertDummyData() {
-	//Format MM-DD-YYYY
+func (a *App) insertImage() {
+	// TODO: Read the values from the request parameter r here which is sent from the UI
 	for x := 0; x < 20; x++ {
-		a.DB.Create(&models.Image{
+		if a.DB.Create(&models.Image{
+			EmailId:     "bruh@ufl.edu",
 			Title:       "Shooting star",
-			EmailId:     "bruh@ufl.edu", // get this from the front end, or update it to be better such that it uses JWT
-			ImageId:     x,              // Do this bit dynamically, use uuid or some similar library to do this
 			Description: "Good photo!",
 			Price:       150.25,
 			UploadedAt:  time.Now(),
-			ImageURL:    "https://picsum.photos/200", // Set after uploading to Firebase/ S3
-			WImageURL:   "https://picsum.photos/200", // Set after uploading to Firebase/ S3
-		})
-		println("sdfsfsd")
+			ImageURL:    "https://picsum.photos/200", // Insert the original Image url obtained from the bucket
+			WImageURL:   "https://picsum.photos/200", // Insert the watermarked Image url obtained from the bucket
+		}).Error != nil {
+			// handler.SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Image Schema")
+		}
+		// var lastImage models.Image
+		// temp := a.DB.Last(&models.Image)
+		// row, err  := temp.Rows()
+		// if err != nil {
+		// 	handler.SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Genre Schema")
+		// 	return
+		// }
+		// a.DB.ScanRows(row, lastImage)
+		// lastInsertedImageId := lastImage.ImageId
+		// // Loop for all the available genres passed from the front end
+		if a.DB.Create(&models.Genre{
+			GenreType: "nature",
+			// ImageId: lastInsertedImageId,
+			ImageId: x + 1,
+		}).Error != nil {
+			// handler.SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Genre Schema")
+			return
+		}
 	}
-	println("Yolo!")
 }
 
 func (a *App) migrateSchemas() {
