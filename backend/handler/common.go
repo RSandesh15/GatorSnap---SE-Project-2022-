@@ -8,7 +8,7 @@ import (
 var GenreCategorySlice = [...]string{"nature", "space", "abstract", "silhouette", "adventure", "architecture", "sunsets"}
 
 func SendJSONResponse(w http.ResponseWriter, status int, payload interface{}) {
-	response, err := json.Marshal(payload)
+	response, err := json.Marshal(map[string]interface{}{"data": payload})
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type,access-control-allow-origin, access-control-allow-headers")
 	w.Header().Set("Content-Type", "application/json")
