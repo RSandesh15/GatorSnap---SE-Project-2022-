@@ -16,6 +16,7 @@ func GetAllImages(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+	defer rows.Close()
 	var image models.Image
 	for rows.Next() {
 		DB.ScanRows(rows, &image)
@@ -47,10 +48,29 @@ func getGenresOfImage(DB *gorm.DB, w http.ResponseWriter, imageId int) ([]string
 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return genres, err
 	}
+	defer genreRows.Close()
 	var currentGenre models.Genre
 	for genreRows.Next() {
 		DB.ScanRows(genreRows, &currentGenre)
 		genres = append(genres, currentGenre.GenreType)
 	}
 	return genres, nil
+}
+
+func GetGenreCategories(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	var genreCategories []models.GenreCategories
+	allCategoriesFromDB := DB.Find(&genreCategories)
+	genreCategoriesRows, err := allCategoriesFromDB.Rows()
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer genreCategoriesRows.Close()
+	var allGenreCategories []string
+	var genreCategory models.GenreCategories
+	for genreCategoriesRows.Next() {
+		DB.ScanRows(genreCategoriesRows, &genreCategory)
+		allGenreCategories = append(allGenreCategories, genreCategory.Category)
+	}
+	SendJSONResponse(w, http.StatusOK, allGenreCategories)
 }
