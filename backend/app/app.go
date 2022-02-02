@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"se_uf/gator_snapstore/handler"
@@ -71,10 +72,17 @@ func (a *App) setupGenreCategories() {
 		// a.DB.Clauses(clause.Insert{Modifier: "ignore"}).Create(&models.GenreCategories{
 		// 	Category: value,
 		// })
-		if a.DB.Model(&models.GenreCategories{}).Where("category = ?", value).RowsAffected == 0 {
-			a.DB.Create(&models.GenreCategories{
-				Category: value,
-			})
+		// if a.DB.Model(&models.GenreCategories{}).Where("category = ?", value).RowsAffected == 0 {
+		// 	a.DB.Create(&models.GenreCategories{
+		// 		Category: value,
+		// 	})
+		// }
+		err := a.DB.Set("gorm:insert_modifier", "IGNORE").Create(&models.GenreCategories{
+			Category: value,
+		}).Error
+		if err != nil {
+			fmt.Println("Error in inserting genre categories (not fatal): ", err)
+			return
 		}
 	}
 }
