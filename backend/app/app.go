@@ -27,7 +27,8 @@ func (a *App) InitializeApplication() {
 	a.migrateSchemas()
 	a.setRouters()
 	// Set the request and response parameters for insertImage()
-	a.insertImage()
+	// a.insertImage()
+	// a.setupGenreCategories()
 }
 
 func (a *App) insertImage() {
@@ -55,7 +56,7 @@ func (a *App) insertImage() {
 		// lastInsertedImageId := lastImage.ImageId
 		// // Loop for all the available genres passed from the front end
 		if a.DB.Create(&models.Genre{
-			ImageId: x + 1,
+			ImageId:   x + 1,
 			GenreType: "nature",
 			// ImageId: lastInsertedImageId,
 		}).Error != nil {
@@ -65,9 +66,23 @@ func (a *App) insertImage() {
 	}
 }
 
+func (a *App) setupGenreCategories() {
+	for _, value := range handler.GenreCategorySlice {
+		// a.DB.Clauses(clause.Insert{Modifier: "ignore"}).Create(&models.GenreCategories{
+		// 	Category: value,
+		// })
+		if a.DB.Model(&models.GenreCategories{}).Where("category = ?", value).RowsAffected == 0 {
+			a.DB.Create(&models.GenreCategories{
+				Category: value,
+			})
+		}
+	}
+}
+
 func (a *App) migrateSchemas() {
 	a.DB.AutoMigrate(&models.Image{})
 	a.DB.AutoMigrate(&models.Genre{})
+	a.DB.AutoMigrate(&models.GenreCategories{})
 }
 
 func (a *App) RunApplication(port string) {
@@ -76,8 +91,13 @@ func (a *App) RunApplication(port string) {
 
 func (a *App) setRouters() {
 	a.Router.HandleFunc("/fetchImages", a.getAllImages).Methods("GET")
+	a.Router.HandleFunc("/fetchGenreCategories", a.getGenreCategories).Methods("GET")
 }
 
 func (a *App) getAllImages(w http.ResponseWriter, r *http.Request) {
 	handler.GetAllImages(a.DB, w, r)
+}
+
+func (a *App) getGenreCategories(w http.ResponseWriter, r *http.Request) {
+	handler.GetGenreCategories(a.DB, w, r)
 }
