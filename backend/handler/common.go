@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+var GenreCategorySlice = [...]string{"nature", "space", "abstract", "silhouette", "adventure", "architecture", "sunsets"}
+
 func SendJSONResponse(w http.ResponseWriter, status int, payload interface{}) {
 	response, err := json.Marshal(payload)
 	w.Header().Set("Access-Control-Allow-Origin", "*")
