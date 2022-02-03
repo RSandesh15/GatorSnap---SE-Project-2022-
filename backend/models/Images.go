@@ -6,7 +6,7 @@ import (
 
 type Image struct {
 	EmailId     string
-	ImageId     int    `gorm:"primaryKey"`
+	ImageId     int `gorm:"primaryKey"`
 	Title       string
 	Description string
 	Price       float32
@@ -26,4 +26,8 @@ type ProductCatalogue struct {
 type Genre struct {
 	ImageId   int
 	GenreType string
+}
+
+type GenreCategories struct {
+	Category string `gorm:"primaryKey"`
 }
