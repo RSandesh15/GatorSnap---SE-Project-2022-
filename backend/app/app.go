@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type App struct {
@@ -33,8 +34,9 @@ func (a *App) InitializeApplication() {
 }
 
 func (a *App) insertImage() {
-	// TODO: Read the values from the request parameter r here which is sent from the UI
+	// Read the values from the request parameter r here which is sent from the UI
 	for x := 0; x < 20; x++ {
+		// TODO: Reading from the request parameter r for finding the corresponding values
 		if a.DB.Create(&models.Image{
 			EmailId:     "bruh@ufl.edu",
 			Title:       "Shooting star",
@@ -45,6 +47,7 @@ func (a *App) insertImage() {
 			WImageURL:   "https://picsum.photos/200", // Insert the watermarked Image url obtained from the bucket
 		}).Error != nil {
 			// handler.SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Image Schema")
+			fmt.Printf("Error inserting in Image Schema")
 		}
 		// var lastImage models.Image
 		// temp := a.DB.Last(&models.Image)
@@ -69,21 +72,9 @@ func (a *App) insertImage() {
 
 func (a *App) setupGenreCategories() {
 	for _, value := range handler.GenreCategorySlice {
-		// a.DB.Clauses(clause.Insert{Modifier: "ignore"}).Create(&models.GenreCategories{
-		// 	Category: value,
-		// })
-		// if a.DB.Model(&models.GenreCategories{}).Where("category = ?", value).RowsAffected == 0 {
-		// 	a.DB.Create(&models.GenreCategories{
-		// 		Category: value,
-		// 	})
-		// }
-		err := a.DB.Set("gorm:insert_modifier", "IGNORE").Create(&models.GenreCategories{
+		a.DB.Clauses(clause.Insert{Modifier: "or ignore"}).Create(&models.GenreCategories{
 			Category: value,
-		}).Error
-		if err != nil {
-			fmt.Println("Error in inserting genre categories (not fatal): ", err)
-			return
-		}
+		})
 	}
 }
 
@@ -100,6 +91,7 @@ func (a *App) RunApplication(port string) {
 func (a *App) setRouters() {
 	a.Router.HandleFunc("/fetchImages", a.getAllImages).Methods("GET")
 	a.Router.HandleFunc("/fetchGenreCategories", a.getGenreCategories).Methods("GET")
+	a.Router.HandleFunc("/uploadSellerImage", a.uploadSellerImage).Methods("GET") // Change this to POST
 }
 
 func (a *App) getAllImages(w http.ResponseWriter, r *http.Request) {
@@ -108,4 +100,8 @@ func (a *App) getAllImages(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) getGenreCategories(w http.ResponseWriter, r *http.Request) {
 	handler.GetGenreCategories(a.DB, w, r)
+}
+
+func (a *App) uploadSellerImage(w http.ResponseWriter, r *http.Request) {
+	handler.UploadSellerImage(a.DB, w, r)
 }
