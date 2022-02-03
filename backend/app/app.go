@@ -90,6 +90,8 @@ func (a *App) RunApplication(port string) {
 
 func (a *App) setRouters() {
 	a.Router.HandleFunc("/fetchImages", a.getAllImages).Methods("GET")
+	//a.Router.HandleFunc("/postform", postFormHandler).Methods("POST")
+
 	a.Router.HandleFunc("/fetchGenreCategories", a.getGenreCategories).Methods("GET")
 	a.Router.HandleFunc("/uploadSellerImage", a.uploadSellerImage).Methods("GET") // Change this to POST
 }
@@ -98,6 +100,13 @@ func (a *App) getAllImages(w http.ResponseWriter, r *http.Request) {
 	handler.GetAllImages(a.DB, w, r)
 }
 
+// var tpl *template.Template
+//tpl, _ = tpl.ParseGlob("templates/*.html")
+// template is the folder where the sellerpageform is stored
+
+//func (a *App) postFormHandler(w http.ResponseWriter, r *http.Request) {
+//tpl.ExecuteTemplate(w, "postform.html", nil)
+//}
 func (a *App) getGenreCategories(w http.ResponseWriter, r *http.Request) {
 	handler.GetGenreCategories(a.DB, w, r)
 }
