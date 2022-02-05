@@ -18,7 +18,7 @@ const rows = [
     '16 Mar, 2019',
     'Elvis Presley',
     'London, UK',
-    'VISA ⠀•••• 3719',
+    'VISA ⠀•••• 3756',
     312.44,
   ),
   createData(
@@ -35,7 +35,7 @@ const rows = [
     '16 Mar, 2019',
     'Michael Jackson',
     'London, UK',
-    'VISA ⠀•••• 3719',
+    'VISA ⠀•••• 3732',
     654.39,
   ),
   createData(
@@ -43,7 +43,7 @@ const rows = [
     '15 Mar, 2019',
     'Bruce Springsteen',
     'London, UK',
-    'MC ⠀•••• 1253',
+    'MC ⠀•••• 3233',
     212.79,
   ),
 ];
@@ -79,7 +79,7 @@ export default function Cart() {
         </TableBody>
       </Table>
       <Link color="primary" href="#" onClick={preventDefault} sx={{ mt: 3 }}>
-        See more purchases
+        See more Orders
       </Link>
     </React.Fragment>
   );

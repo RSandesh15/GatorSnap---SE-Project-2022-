@@ -30,7 +30,7 @@ function Copyright(props) {
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
       {'Copyright © '}
       <Link color="inherit" href="https://mui.com/">
-        Your Website
+        GatorSnap!
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -102,18 +102,25 @@ function DashboardContent() {
               pr: '24px', // keep right padding when drawer closed
             }}
           >
+            <center>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            GatorSnaps!
+          </Typography>
+          </center>
+          
             <IconButton
               edge="start"
               color="inherit"
               aria-label="open drawer"
               onClick={toggleDrawer}
               sx={{
-                marginRight: '36px',
+                marginRight: '30px',
                 ...(open && { display: 'none' }),
               }}
             >
-              <MenuIcon />
+              <MenuIcon headerAlign="right" />
             </IconButton>
+            
             <Typography
               component="h1"
               variant="h6"
