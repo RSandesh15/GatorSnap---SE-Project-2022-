@@ -35,3 +35,6 @@ Method: GET
 
 Here is a walkthrough of what was achieved on the backend and database side for sprint 1. 
 <img src='Gifs/backend_Sprint1.gif' title='Backend' width='' />
+
+Here is a walkthrough of what was achieved on the frontend side for sprint 1. 
+<img src='Gifs/Frontend_Sprint1.mp4' title='Frontend' width='' />
