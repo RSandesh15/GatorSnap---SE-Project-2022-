@@ -17,9 +17,21 @@ Method: GET
 - Worked on Marshalling and UnMarshalling of JSON data.
 
 - Developed several data structs to store data in sqlite.
+### Front-end:
+- For Sprint 1, we started by creating the project structure and boilerplate code by following the industry standards. We then proceeded forward to design and create the application features planned for Sprint 1.
+
+- Starting with the login page, we created functionalities such as : Checking for '@' in the email field, alerting if the field are left blank, displaying a pop up if incorrect credential are typed. Only logs in for user using specified mock.json file.
+
+- Mock sign up page which would register all the required information for making a customer login. There are two different login pages for seller and buyer. 
+
+- Seller Dashboard displays the seller profile, his total balances, and a list of purchases previously made. Also incorporates dashboard's app bar with seamless transitions. From the seller dashboard, the seller can re-direct to the picture upload page. 
+
+- Seller Upload Page contains fields such as picture title, description, price, and genre. The details are submitted once the seller clicks the submit button. 
+
+- User Landing Page: After loggin in successfully, the users can view the images uploaded by sellers in a grid manner. The images have been unmarshalled from the json file. 
 
 
 ### Video Walkthrough
 
-Here is a walkthrough of what was achieved on the backend and database side for sprint 1.
+Here is a walkthrough of what was achieved on the backend and database side for sprint 1. 
 <img src='Gifs/backend_Sprint1.gif' title='Backend' width='' />

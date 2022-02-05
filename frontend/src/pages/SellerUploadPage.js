@@ -3,11 +3,14 @@ import '../App.css';
 
 import { Button, Form, FormGroup, Label, Input }
   from 'reactstrap';
+  
 
 
 
 function SellerUploadPage() {
   return (
+    
+    
     <Form className="details">
       <h1 className="text-center">Seller Page (Picture Details)</h1>
       <FormGroup>
