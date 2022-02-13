@@ -94,6 +94,7 @@ func (a *App) setRouters() {
 
 	a.Router.HandleFunc("/fetchGenreCategories", a.getGenreCategories).Methods("GET")
 	a.Router.HandleFunc("/uploadSellerImage", a.uploadSellerImage).Methods("GET") // Change this to POST
+	a.Router.HandleFunc("/fetchProductInfo/{imageId}", a.getProductInfo).Methods("GET")
 }
 
 func (a *App) getAllImages(w http.ResponseWriter, r *http.Request) {
@@ -113,4 +114,8 @@ func (a *App) getGenreCategories(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) uploadSellerImage(w http.ResponseWriter, r *http.Request) {
 	handler.UploadSellerImage(a.DB, w, r)
+}
+
+func (a *App) getProductInfo(w http.ResponseWriter, r *http.Request) {
+	handler.GetProductInfo(a.DB, w, r)
 }

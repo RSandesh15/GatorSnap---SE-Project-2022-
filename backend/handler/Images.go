@@ -2,18 +2,23 @@ package handler
 
 import (
 	"bytes"
-	"fmt"
+	"image"
+	"image/draw"
+	"image/jpeg"
+	"image/png"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
 	"se_uf/gator_snapstore/models"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/globalsign/mgo/bson"
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"
 )
@@ -86,42 +91,102 @@ func GetGenreCategories(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	SendJSONResponse(w, http.StatusOK, allGenreCategories)
 }
 
+func processWaterMarking(todoImage image.Image, todoImageFormat string) (image.Image, error) {
+	image2, err := os.Open("watermark.png")
+	if err != nil {
+		log.Fatalf("failed to open: %s", err)
+		return nil, err
+	}
+	watermark, err := png.Decode(image2)
+	if err != nil {
+		log.Fatalf("failed to decode: %s", err)
+		return nil, err
+	}
+	defer image2.Close()
+
+	// offset := image.Pt(300, 200)
+	// b := todoImage.Bounds()
+	baseBound := todoImage.Bounds()
+	markBound := watermark.Bounds()
+	offset := image.Pt(
+		(baseBound.Size().X/2)-(markBound.Size().X/2),
+		(baseBound.Size().Y/2)-(markBound.Size().Y/2),
+	)
+	waterMarkedImage := image.NewRGBA(baseBound)
+	draw.Draw(waterMarkedImage, baseBound, todoImage, image.Point{}, draw.Src)
+	draw.Draw(waterMarkedImage, watermark.Bounds().Add(offset), watermark, image.Point{}, draw.Over)
+
+	return waterMarkedImage, nil
+}
+
 func UploadSellerImage(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	// Reading the env file to get the cloud key and secret
 	err := godotenv.Load(".env")
 	if err != nil {
 		SendErrorResponse(w, http.StatusInternalServerError, "Error in reading the env file")
+		return
 	}
 	maxSize := int64(10 * 1024 * 1024) // allow only 10MB of file size
-	file, fileHeader, err := r.FormFile("sellerImage")
-	// wRawImage, format, err := image.Decode(file)
+	originalFile, originalFileHeader, err := r.FormFile("sellerImage")
 	if err != nil {
 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	if maxSize < fileHeader.Size {
+	defer originalFile.Close()
+	if maxSize < originalFileHeader.Size {
 		SendErrorResponse(w, http.StatusInternalServerError, "File too big! Max file size allowed: 10 MB")
 		return
 	}
-	defer file.Close()
-	// create an AWS session which can be reused if we're uploading many files
-	s, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-2"),
-		Credentials: credentials.NewStaticCredentials(
-			os.Getenv("KEY_ID"), // id
-			os.Getenv("SECRET"), // secret
-			""),                 // token can be left blank for now
-	})
+	waterMarkedFileHeader := originalFileHeader
+	wRawImage, wRawImageformat, err := image.Decode(originalFile)
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, "Error in water marking process")
+		return
+	}
+	waterMarkedImage, err := processWaterMarking(wRawImage, wRawImageformat)
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, "Error in water marking process")
+		return
+	}
+	watermarkedImageFile, err := os.Create("output" + wRawImageformat)
 	if err != nil {
 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	fileName, err := UploadImageToS3(s, file, fileHeader)
-	if err != nil {
-		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
-		return
+	if wRawImageformat == "jpeg" {
+		err := jpeg.Encode(watermarkedImageFile, waterMarkedImage, &jpeg.Options{Quality: jpeg.DefaultQuality})
+		if err != nil {
+			SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		defer watermarkedImageFile.Close()
+	} else if wRawImageformat == "png" {
+		err := png.Encode(watermarkedImageFile, waterMarkedImage)
+		if err != nil {
+			SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
-	fmt.Fprintf(w, "Image uploaded successfully: %v", fileName)
+	waterMarkedFileHeader.Filename = watermarkedImageFile.Name()
+	// waterMarkedFileHeader.Size = watermarkedImageFile.
+	// // create an AWS session which can be reused if we're uploading many files
+	// s, err := session.NewSession(&aws.Config{
+	// 	Region: aws.String("us-east-2"),
+	// 	Credentials: credentials.NewStaticCredentials(
+	// 		os.Getenv("KEY_ID"), // id
+	// 		os.Getenv("SECRET"), // secret
+	// 		""),                 // token can be left blank for now
+	// })
+	// if err != nil {
+	// 	SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+	// 	return
+	// }
+	// fileName, err := UploadImageToS3(s, originalFile, originalFileHeader)
+	// if err != nil {
+	// 	SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+	// 	return
+	// }
+	// fmt.Fprintf(w, "Image uploaded successfully: %v", fileName)
 
 	// Inserting the image details in the database:
 
@@ -151,10 +216,47 @@ func UploadImageToS3(s *session.Session, file multipart.File, fileHeader *multip
 		ContentType:          aws.String(http.DetectContentType(buffer)),
 		ContentDisposition:   aws.String("attachment"),
 		ServerSideEncryption: aws.String("AES256"),
-		StorageClass:         aws.String("INTELLIGENT_TIERING"),
+		// StorageClass:         aws.String("INTELLIGENT_TIERING"),
 	})
 	if err != nil {
 		return "", err
 	}
 	return tempFileName, err
+}
+
+func GetProductInfo(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	imageIdInfo := params["imageId"]
+	var image []models.Image
+	convertedImageId, err := strconv.Atoi(imageIdInfo)
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	currentImageInfo := DB.Where(&models.Image{ImageId: convertedImageId}).Find(&image)
+	// For if the user sends the wrong imageId
+	if currentImageInfo.RowsAffected <= 0 {
+		SendErrorResponse(w, http.StatusInternalServerError, "Invalid Image ID passed")
+		return
+	}
+	imageRow, err := currentImageInfo.Rows()
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer imageRow.Close()
+	var currentImage models.Image
+	var productImageInfo models.Image
+	for imageRow.Next() {
+		DB.ScanRows(imageRow, &currentImage)
+		productImageInfo = models.Image{
+			ImageId:     currentImage.ImageId,
+			Title:       currentImage.Title,
+			Description: currentImage.Description,
+			Price:       currentImage.Price,
+			UploadedAt:  currentImage.UploadedAt,
+			WImageURL:   currentImage.WImageURL,
+		}
+	}
+	SendJSONResponse(w, http.StatusOK, productImageInfo)
 }
