@@ -6,13 +6,13 @@ import (
 
 type Image struct {
 	EmailId     string
-	ImageId     int `gorm:"primaryKey"`
-	Title       string
-	Description string
-	Price       float32
-	UploadedAt  time.Time
-	ImageURL    string
-	WImageURL   string
+	ImageId     int       `gorm:"primaryKey" json:"imageId"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Price       float32   `json:"price"`
+	UploadedAt  time.Time `json:"uploadedAt"`
+	ImageURL    string    
+	WImageURL   string    `json:"wImageUrl"`
 }
 
 type ProductCatalogue struct {
