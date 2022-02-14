@@ -38,13 +38,13 @@ func (a *App) insertImage() {
 	for x := 0; x < 20; x++ {
 		// TODO: Reading from the request parameter r for finding the corresponding values
 		if a.DB.Create(&models.Image{
-			EmailId:     "bruh@ufl.edu",
-			Title:       "Shooting star",
-			Description: "Good photo!",
-			Price:       150.25,
-			UploadedAt:  time.Now(),
-			ImageURL:    "https://picsum.photos/200", // Insert the original Image url obtained from the bucket
-			WImageURL:   "https://picsum.photos/200", // Insert the watermarked Image url obtained from the bucket
+			SellerEmailId: "bruh@ufl.edu",
+			Title:         "Shooting star",
+			Description:   "Good photo!",
+			Price:         150.25,
+			UploadedAt:    time.Now(),
+			ImageURL:      "https://picsum.photos/200", // Insert the original Image url obtained from the bucket
+			WImageURL:     "https://picsum.photos/200", // Insert the watermarked Image url obtained from the bucket
 		}).Error != nil {
 			// handler.SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Image Schema")
 			fmt.Printf("Error inserting in Image Schema")
