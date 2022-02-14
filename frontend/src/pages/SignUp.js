@@ -12,6 +12,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Axios from 'axios';
 
 function Copyright(props) {
   return (
@@ -30,6 +31,11 @@ const theme = createTheme();
 
 export default function SignUp() {
   const handleSubmit = (event) => {
+    /*Axios.post("http://localhost:8888/signUp", {firstName : firstName}).then(
+      ()=> {
+        alert("successful insert");
+      }
+    );*/
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     // eslint-disable-next-line no-console
@@ -38,6 +44,8 @@ export default function SignUp() {
       password: data.get('password'),
     });
   };
+
+  const [firstName , setFirstName] = React.useState('')
 
   return (
     <ThemeProvider theme={theme}>
@@ -68,6 +76,9 @@ export default function SignUp() {
                   id="firstName"
                   label="First Name"
                   autoFocus
+                  /*onChange={(e)=> {
+                    setFirstName{e.target.value}
+                  }}*/
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -113,6 +124,7 @@ export default function SignUp() {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              /*onClick=(handleSubmit)*/
             >
               Sign Up
             </Button>

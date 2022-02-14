@@ -16,6 +16,7 @@ import {
   Toolbar,
   
   } from "@material-ui/core";
+import { Axios } from 'axios';
 
 function srcset(image, width, height, rows = 1, cols = 1) {
   return {
@@ -27,7 +28,13 @@ function srcset(image, width, height, rows = 1, cols = 1) {
 }
 
 export default function ShowcaseImages() {
+  React.useEffect(()=> {
+    Axios.get("http://localhost:8888/fetchImages").then((Response)=>{
+      console.log(Response)
+    }); 
+  },[]);
   return (
+    
     <div>
       <AppBar position="static" alignitems="center" color="primary">
       <Toolbar>
