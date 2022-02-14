@@ -6,35 +6,49 @@ import (
 	"net/http"
 	"se_uf/gator_snapstore/models"
 
+	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
 
 func FetchCartInfo(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	// TODO: Check if the user is authorized to add to the table or not by comparing the buyerEmailId
+	// and the email id from the token received
 	var allProductImages []models.ProductCatalogue
-	var allImages []models.Image
-	allImagesFromDB := DB.Find(&allImages)
-	rows, err := allImagesFromDB.Rows()
+	params := mux.Vars(r)
+	buyerEmailId := params["buyerEmailId"]
+	var buyerCartProducts models.Cart
+	allBuyerCartProducts := DB.Where(&models.Cart{BuyerEmailId: buyerEmailId}).Find(&buyerCartProducts)
+	rows, err := allBuyerCartProducts.Rows()
 	if err != nil {
 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	defer rows.Close()
-	var image models.Image
+	var cartInfo models.Cart
 	for rows.Next() {
-		DB.ScanRows(rows, &image)
-		genres, err := getGenresOfImage(DB, w, image.ImageId)
+		DB.ScanRows(rows, &cartInfo)
+		image, flag := checkIfImageExistsOrNot(DB, cartInfo.ImageId)
+		if !flag {
+			SendErrorResponse(w, http.StatusInternalServerError, "Mentioned imageId does not exist in fetch cart info method")
+			return
+		}
+		imageRow, err := image.Rows()
 		if err != nil {
 			SendErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		productCatalogueImage := models.ProductCatalogue{
-			ImageId:   image.ImageId,
-			Price:     image.Price,
-			Title:     image.Title,
-			WImageURL: image.WImageURL,
-			Genre:     genres,
+		defer imageRow.Close()
+		var currentImage models.Image
+		for imageRow.Next() {
+			DB.ScanRows(imageRow, &currentImage)
+			productCatalogueImage := models.ProductCatalogue{
+				ImageId:   currentImage.ImageId,
+				Price:     currentImage.Price,
+				Title:     currentImage.Title,
+				WImageURL: currentImage.WImageURL,
+			}
+			allProductImages = append(allProductImages, productCatalogueImage)
 		}
-		allProductImages = append(allProductImages, productCatalogueImage)
 	}
 	SendJSONResponse(w, http.StatusOK, allProductImages)
 }
