@@ -227,18 +227,13 @@ func UploadImageToS3(s *session.Session, file multipart.File, fileHeader *multip
 func GetProductInfo(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	imageIdInfo := params["imageId"]
-	var image []models.Image
 	convertedImageId, err := strconv.Atoi(imageIdInfo)
-	if err != nil {
+	currentImageInfo, flag := checkIfImageExistsOrNot(DB, convertedImageId)
+	if !flag {
 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	currentImageInfo := DB.Where(&models.Image{ImageId: convertedImageId}).Find(&image)
-	// For if the user sends the wrong imageId
-	if currentImageInfo.RowsAffected <= 0 {
-		SendErrorResponse(w, http.StatusInternalServerError, "Invalid Image ID passed")
-		return
-	}
+
 	imageRow, err := currentImageInfo.Rows()
 	if err != nil {
 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
@@ -259,4 +254,13 @@ func GetProductInfo(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	SendJSONResponse(w, http.StatusOK, productImageInfo)
+}
+
+func checkIfImageExistsOrNot(DB *gorm.DB, imageId int) (*gorm.DB, bool) {
+	var image []models.Image
+	currentImageInfo := DB.Where(&models.Image{ImageId: imageId}).Find(&image)
+	if currentImageInfo.RowsAffected <= 0 {
+		return nil, false
+	}
+	return currentImageInfo, true
 }

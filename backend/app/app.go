@@ -82,6 +82,8 @@ func (a *App) migrateSchemas() {
 	a.DB.AutoMigrate(&models.Image{})
 	a.DB.AutoMigrate(&models.Genre{})
 	a.DB.AutoMigrate(&models.GenreCategories{})
+	a.DB.AutoMigrate(&models.Cart{})
+	a.DB.AutoMigrate(&models.PreviousOrders{})
 }
 
 func (a *App) RunApplication(port string) {
@@ -95,6 +97,9 @@ func (a *App) setRouters() {
 	a.Router.HandleFunc("/fetchGenreCategories", a.getGenreCategories).Methods("GET")
 	a.Router.HandleFunc("/uploadSellerImage", a.uploadSellerImage).Methods("GET") // Change this to POST
 	a.Router.HandleFunc("/fetchProductInfo/{imageId}", a.getProductInfo).Methods("GET")
+	a.Router.HandleFunc("/fetchCartInfo/{buyerEmailId}", a.fetchCartInfo).Methods("GET")
+	a.Router.HandleFunc("/addToCart", a.addToCart).Methods("POST")
+	a.Router.HandleFunc("/deleteFromCart", a.deleteFromCart).Methods("POST")
 }
 
 func (a *App) getAllImages(w http.ResponseWriter, r *http.Request) {
@@ -118,4 +123,16 @@ func (a *App) uploadSellerImage(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) getProductInfo(w http.ResponseWriter, r *http.Request) {
 	handler.GetProductInfo(a.DB, w, r)
+}
+
+func (a *App) fetchCartInfo(w http.ResponseWriter, r *http.Request) {
+	handler.FetchCartInfo(a.DB, w, r)
+}
+
+func (a *App) addToCart(w http.ResponseWriter, r *http.Request) {
+	handler.AddImageToCart(a.DB, w, r)
+}
+
+func (a *App) deleteFromCart(w http.ResponseWriter, r *http.Request) {
+	handler.DeleteImageFromCart(a.DB, w, r)
 }
