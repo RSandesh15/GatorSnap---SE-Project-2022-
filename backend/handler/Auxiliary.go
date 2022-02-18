@@ -113,6 +113,16 @@ func DeleteImageFromCart(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var dataToBeDeletedFromCart models.Cart
-	DB.Where(&models.Cart{BuyerEmailId: data.BuyerEmailId, ImageId: data.ImageId}).Limit(1).Delete(&dataToBeDeletedFromCart)
+	rowsDeleted := DB.Where(&models.Cart{BuyerEmailId: data.BuyerEmailId, ImageId: data.ImageId}).Delete(&dataToBeDeletedFromCart)
+	// As the delete query is not running correctly with limit 1, we are deleting the record from the 
+	for i := 1; i < int(rowsDeleted.RowsAffected); i++ {
+		if DB.Create(&models.Cart{
+			BuyerEmailId: data.BuyerEmailId,
+			ImageId:      data.ImageId,
+		}).Error != nil {
+			SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Cart Schema in deletion operation")
+			return
+		}
+	}
 	SendJSONResponse(w, http.StatusOK, map[string]string{"message": "Removed from cart"})
 }
