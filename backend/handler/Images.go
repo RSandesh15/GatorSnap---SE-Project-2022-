@@ -2,9 +2,9 @@ package handler
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"image/draw"
-	"image/jpeg"
 	"image/png"
 	"log"
 	"mime/multipart"
@@ -15,6 +15,7 @@ import (
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/globalsign/mgo/bson"
@@ -137,56 +138,57 @@ func UploadSellerImage(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		SendErrorResponse(w, http.StatusInternalServerError, "File too big! Max file size allowed: 10 MB")
 		return
 	}
-	waterMarkedFileHeader := originalFileHeader
-	wRawImage, wRawImageformat, err := image.Decode(originalFile)
-	if err != nil {
-		SendErrorResponse(w, http.StatusInternalServerError, "Error in water marking process")
-		return
-	}
-	waterMarkedImage, err := processWaterMarking(wRawImage, wRawImageformat)
-	if err != nil {
-		SendErrorResponse(w, http.StatusInternalServerError, "Error in water marking process")
-		return
-	}
-	watermarkedImageFile, err := os.Create("output" + wRawImageformat)
+	fmt.Println("Image name: ", originalFileHeader.Filename)
+	// waterMarkedFileHeader := originalFileHeader
+	// wRawImage, wRawImageformat, err := image.Decode(originalFile)
+	// if err != nil {
+	// 	SendErrorResponse(w, http.StatusInternalServerError, "Error in water marking process")
+	// 	return
+	// }
+	// waterMarkedImage, err := processWaterMarking(wRawImage, wRawImageformat)
+	// if err != nil {
+	// 	SendErrorResponse(w, http.StatusInternalServerError, "Error in water marking process")
+	// 	return
+	// }
+	// watermarkedImageFile, err := os.Create("output" + wRawImageformat)
+	// if err != nil {
+	// 	SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+	// 	return
+	// }
+	// if wRawImageformat == "jpeg" {
+	// 	err := jpeg.Encode(watermarkedImageFile, waterMarkedImage, &jpeg.Options{Quality: jpeg.DefaultQuality})
+	// 	if err != nil {
+	// 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+	// 		return
+	// 	}
+	// 	defer watermarkedImageFile.Close()
+	// } else if wRawImageformat == "png" {
+	// 	err := png.Encode(watermarkedImageFile, waterMarkedImage)
+	// 	if err != nil {
+	// 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+	// 		return
+	// 	}
+	// }
+	// waterMarkedFileHeader.Filename = watermarkedImageFile.Name()
+	// waterMarkedFileHeader.Size = watermarkedImageFile.
+	// // create an AWS session which can be reused if we're uploading many files
+	s, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-east-1"),
+		Credentials: credentials.NewStaticCredentials(
+			os.Getenv("KEY_ID"), // id
+			os.Getenv("SECRET"), // secret
+			""),                 // token can be left blank for now
+	})
 	if err != nil {
 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	if wRawImageformat == "jpeg" {
-		err := jpeg.Encode(watermarkedImageFile, waterMarkedImage, &jpeg.Options{Quality: jpeg.DefaultQuality})
-		if err != nil {
-			SendErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		defer watermarkedImageFile.Close()
-	} else if wRawImageformat == "png" {
-		err := png.Encode(watermarkedImageFile, waterMarkedImage)
-		if err != nil {
-			SendErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
+	fileURLPath, err := UploadImageToS3(s, originalFile, originalFileHeader)
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
 	}
-	waterMarkedFileHeader.Filename = watermarkedImageFile.Name()
-	// waterMarkedFileHeader.Size = watermarkedImageFile.
-	// // create an AWS session which can be reused if we're uploading many files
-	// s, err := session.NewSession(&aws.Config{
-	// 	Region: aws.String("us-east-2"),
-	// 	Credentials: credentials.NewStaticCredentials(
-	// 		os.Getenv("KEY_ID"), // id
-	// 		os.Getenv("SECRET"), // secret
-	// 		""),                 // token can be left blank for now
-	// })
-	// if err != nil {
-	// 	SendErrorResponse(w, http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
-	// fileName, err := UploadImageToS3(s, originalFile, originalFileHeader)
-	// if err != nil {
-	// 	SendErrorResponse(w, http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
-	// fmt.Fprintf(w, "Image uploaded successfully: %v", fileName)
+	println(w, "Image uploaded successfully: %v", fileURLPath)
 
 	// Inserting the image details in the database:
 
@@ -208,9 +210,9 @@ func UploadImageToS3(s *session.Session, file multipart.File, fileHeader *multip
 	// filename, content-type and storage class of the file
 	// you're uploading
 	_, err := s3.New(s).PutObject(&s3.PutObjectInput{
-		Bucket:               aws.String("gator-snapstore"),
-		Key:                  aws.String(tempFileName),
-		ACL:                  aws.String("public-read"), // could be private if you want it to be access by only authorized users
+		Bucket: 			  aws.String("gator-snapstore"),
+		Key:    			  aws.String(tempFileName),
+		// ACL:                  aws.String("public-read"), // could be private if you want it to be access by only authorized users
 		Body:                 bytes.NewReader(buffer),
 		ContentLength:        aws.Int64(int64(size)),
 		ContentType:          aws.String(http.DetectContentType(buffer)),
@@ -221,7 +223,8 @@ func UploadImageToS3(s *session.Session, file multipart.File, fileHeader *multip
 	if err != nil {
 		return "", err
 	}
-	return tempFileName, err
+	fileURL := "https://gator-snapstore.s3.amazonaws.com/" + tempFileName
+	return fileURL, err
 }
 
 func GetProductInfo(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {

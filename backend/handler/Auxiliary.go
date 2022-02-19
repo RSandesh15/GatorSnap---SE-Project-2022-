@@ -114,7 +114,8 @@ func DeleteImageFromCart(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	}
 	var dataToBeDeletedFromCart models.Cart
 	rowsDeleted := DB.Where(&models.Cart{BuyerEmailId: data.BuyerEmailId, ImageId: data.ImageId}).Delete(&dataToBeDeletedFromCart)
-	// As the delete query is not running correctly with limit 1, we are deleting the record from the 
+	// As the delete query is not running correctly with limit 1, we are deleting the record from the database and then adding the records
+	// such that addedRecords = deleteRecords - 1
 	for i := 1; i < int(rowsDeleted.RowsAffected); i++ {
 		if DB.Create(&models.Cart{
 			BuyerEmailId: data.BuyerEmailId,
