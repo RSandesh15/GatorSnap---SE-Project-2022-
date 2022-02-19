@@ -217,6 +217,10 @@ func UploadSellerImage(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	println(w, "WaterMarked Image uploaded successfully: %v", waterMarkedImageURL)
+	err = os.Remove("output.jpeg")
+	if err != nil {
+		print("Error in deleting output.jpeg file: ", err.Error())
+	}
 	// Inserting the image details in the database:
 
 	// TODO: Storing the wfileURLPath and fileURLPath in the image database along with the other details
