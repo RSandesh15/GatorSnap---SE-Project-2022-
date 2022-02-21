@@ -131,9 +131,9 @@ func UploadSellerImage(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	s, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-east-1"),
 		Credentials: credentials.NewStaticCredentials(
-			os.Getenv("KEY_ID"), // id
-			os.Getenv("SECRET"), // secret
-			""),                 // token can be left blank for now
+			os.Getenv("KEY_ID"),
+			os.Getenv("SECRET"),
+			""),
 	})
 	if err != nil {
 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
@@ -221,6 +221,17 @@ func UploadSellerImage(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		print("Error in deleting output.jpeg file: ", err.Error())
 	}
+
+	// Parsing the multipart file data:
+	err = r.ParseMultipartForm(0)
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, "Error parsing multipart file data")
+		return
+	}
+ 	// sellerEmailId := r.FormValue("sellerEmailId")
+	// title := r.FormValue("title")
+	// description := r.FormValue("description")
+	// price := r.FormValue("price")
 	// Inserting the image details in the database:
 
 	// TODO: Storing the wfileURLPath and fileURLPath in the image database along with the other details
