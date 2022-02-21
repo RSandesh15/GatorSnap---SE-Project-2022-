@@ -93,9 +93,8 @@ func (a *App) RunApplication(port string) {
 func (a *App) setRouters() {
 	a.Router.HandleFunc("/fetchImages", a.getAllImages).Methods("GET")
 	//a.Router.HandleFunc("/postform", postFormHandler).Methods("POST")
-
 	a.Router.HandleFunc("/fetchGenreCategories", a.getGenreCategories).Methods("GET")
-	a.Router.HandleFunc("/uploadSellerImage", a.uploadSellerImage).Methods("POST") // Change this to POST
+	a.Router.HandleFunc("/uploadSellerImage", a.uploadSellerImage).Methods("POST")
 	a.Router.HandleFunc("/fetchProductInfo/{imageId}", a.getProductInfo).Methods("GET")
 	a.Router.HandleFunc("/fetchCartInfo/{buyerEmailId}", a.fetchCartInfo).Methods("GET")
 	a.Router.HandleFunc("/addToCart", a.addToCart).Methods("POST")
