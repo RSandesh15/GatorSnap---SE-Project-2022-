@@ -9,7 +9,6 @@ import (
 	"se_uf/gator_snapstore/models"
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/sqlite"
@@ -66,6 +65,28 @@ func TestFetchProductInfoWhenExists(t *testing.T) {
 	}
 }
 
+func TestFetchProductInfoWhenDoesNotExist(t *testing.T) {
+	app := initApp()
+	req, _ := http.NewRequest("GET", "/fetchProductInfo", nil)
+	imageIdToBePassed := "-123"
+	req = mux.SetURLVars(req, map[string]string{"imageId": imageIdToBePassed})
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.getProductInfo)
+	handler.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusNotFound, t)
+	checkContentType(r, t)
+	// print(r.Body.String())
+	var dataMap map[string]map[string]string
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	if dataMap["data"]["error"] != "Resource not found" {
+		t.Errorf("Fetch Product Info does not exist for the given imageId: %v", imageIdToBePassed)
+	}
+}
+
 func initApp() App {
 	db, _ := gorm.Open(sqlite.Open("gatorsnapstore.db"), &gorm.Config{})
 	db.AutoMigrate(&models.Image{})
@@ -91,7 +112,7 @@ func checkBody(body *bytes.Buffer, image *models.Image, t *testing.T) {
 	err := json.Unmarshal(body.Bytes(), &dataMap)
 	// print("Data is: ", data["data"][0].Price)
 	if err != nil {
-		fmt.Println("=================================>", err.Error())
+		fmt.Println("Error in Unmarshalling", err.Error())
 	}
 	// print(body.String())
 	// if len(dataMap["data"]) != 1 {
@@ -108,42 +129,5 @@ func checkBody(body *bytes.Buffer, image *models.Image, t *testing.T) {
 	// fmt.Println(firstProductCatalogue)
 	if image.ImageId != firstProductCatalogue.ImageId {
 		t.Errorf("Wrong body: got %v want %v", dataMap["data"][0], image)
-	}
-}
-
-func fillDummyData() {
-	app := initApp()
-	for x := 0; x < 20; x++ {
-		// TODO: Reading from the request parameter r for finding the corresponding values
-		if app.DB.Create(&models.Image{
-			SellerEmailId: "bruh@ufl.edu",
-			Title:         "Shooting star",
-			Description:   "Good photo!",
-			Price:         150.25,
-			UploadedAt:    time.Now(),
-			ImageURL:      "https://picsum.photos/200", // Insert the original Image url obtained from the bucket
-			WImageURL:     "https://picsum.photos/200", // Insert the watermarked Image url obtained from the bucket
-		}).Error != nil {
-			// handler.SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Image Schema")
-			fmt.Printf("Error inserting in Image Schema")
-		}
-		// var lastImage models.Image
-		// temp := a.DB.Last(&models.Image)
-		// row, err  := temp.Rows()
-		// if err != nil {
-		// 	handler.SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Genre Schema")
-		// 	return
-		// }
-		// a.DB.ScanRows(row, lastImage)
-		// lastInsertedImageId := lastImage.ImageId
-		// // Loop for all the available genres passed from the front end
-		if app.DB.Create(&models.Genre{
-			ImageId:   x + 1,
-			GenreType: "nature",
-			// ImageId: lastInsertedImageId,
-		}).Error != nil {
-			// handler.SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Genre Schema")
-			return
-		}
 	}
 }

@@ -281,7 +281,11 @@ func s3ConfigUpload(s *session.Session, tempFileName string, size int64, buffer 
 func GetProductInfo(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	imageIdInfo := params["imageId"]
-	convertedImageId, _ := strconv.Atoi(imageIdInfo)
+	convertedImageId, err := strconv.Atoi(imageIdInfo)
+	if err != nil {
+		SendErrorResponse(w, http.StatusNotFound, "Resource not found")
+		return
+	}
 	// TODO: Handle the condition when an alphabet is passed as imageId to the API instead of an integer
 	currentImageInfo, flag := checkIfImageExistsOrNot(DB, convertedImageId)
 	if !flag {
