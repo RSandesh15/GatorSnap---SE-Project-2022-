@@ -28,12 +28,11 @@ func (a *App) InitializeApplication() {
 	a.DB = db
 	a.migrateSchemas()
 	a.setRouters()
-	// Set the request and response parameters for insertImage()
-	// a.insertImage()
+	// a.InsertImage()
 	// a.setupGenreCategories()
 }
 
-func (a *App) insertImage() {
+func (a *App) InsertImage() {
 	// Read the values from the request parameter r here which is sent from the UI
 	for x := 0; x < 20; x++ {
 		// TODO: Reading from the request parameter r for finding the corresponding values

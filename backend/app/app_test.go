@@ -7,9 +7,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"se_uf/gator_snapstore/models"
+	"strconv"
 	"testing"
 	"time"
 
+	"github.com/gorilla/mux"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -27,7 +29,9 @@ func TestGetAllImagesAndCompareStruct(t *testing.T) {
 	// 	ImageId:   1,
 	// 	GenreType: "nature",
 	// })
+	// Uncomment the following line when running the code for the first time:
 	// fillDummyData()
+	// app.InsertImage()
 	req, _ := http.NewRequest("GET", "/fetchImages", nil)
 	r := httptest.NewRecorder()
 	handler := http.HandlerFunc(app.getAllImages)
@@ -37,6 +41,29 @@ func TestGetAllImagesAndCompareStruct(t *testing.T) {
 	checkStatusCode(r.Code, http.StatusOK, t)
 	checkContentType(r, t)
 	checkBody(r.Body, image, t)
+}
+
+func TestFetchProductInfoWhenExists(t *testing.T) {
+	app := initApp()
+	req, _ := http.NewRequest("GET", "/fetchProductInfo", nil)
+	imageIdToBePassed := "1"
+	req = mux.SetURLVars(req, map[string]string{"imageId": imageIdToBePassed})
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.getProductInfo)
+	handler.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusOK, t)
+	checkContentType(r, t)
+	// print(r.Body.String())
+	var dataMap map[string]models.Image
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	processedImageId, _ := strconv.Atoi(imageIdToBePassed)
+	if dataMap["data"].ImageId != processedImageId {
+		t.Errorf("Fetch Product Info does not exist for the given imageId: %v", imageIdToBePassed)
+	}
 }
 
 func initApp() App {
@@ -67,9 +94,9 @@ func checkBody(body *bytes.Buffer, image *models.Image, t *testing.T) {
 		fmt.Println("=================================>", err.Error())
 	}
 	// print(body.String())
-	if len(dataMap["data"]) != 1 {
-		t.Errorf("Wrong length: got %v want 1", len(dataMap["data"]))
-	}
+	// if len(dataMap["data"]) != 1 {
+	// 	t.Errorf("Wrong length: got %v want 1", len(dataMap["data"]))
+	// }
 	firstProductCatalogue := models.ProductCatalogue{
 		ImageId:   dataMap["data"][0].ImageId,
 		Title:     dataMap["data"][0].Title,
