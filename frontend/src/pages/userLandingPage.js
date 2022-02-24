@@ -5,8 +5,13 @@ import ImageListItem from "@mui/material/ImageListItem";
 import ImageListItemBar from "@mui/material/ImageListItemBar";
 import IconButton from '@mui/material/IconButton';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
-
-
+import Badge from "@material-ui/core/Badge";
+import ShoppingCartIcon from "@material-ui/icons/ShoppingCart";
+import Box from '@material-ui/core/Box'
+import Button from "@material-ui/core/Button";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
+import AddIcon from "@material-ui/icons/Add";
+import RemoveIcon from "@material-ui/icons/Remove";
 import '../App1.css';
 
 //Bootstrap
@@ -35,15 +40,13 @@ export default function UserLandingPage() {
   useEffect(() => {
     axios.get("http://localhost:8888/fetchImages").then((response) => {
       debugger;
-      // wait(10000);
       setFetchedImageData(response.data.data);
       console.log(fetchImages);
-      // wait(2000);
-      //localStorage.setItem('userLandingPageData', JSON.stringify(response.data));
-      //setDelay("Check")
-      // console.log(obj);
     });
   }, []);
+
+  const [itemCount, setItemCount] = React.useState(1);
+
   return (
     <div className="app">
       
@@ -106,14 +109,9 @@ export default function UserLandingPage() {
                       <a class="nav-icon d-none d-lg-inline" href="#" data-bs-toggle="modal" data-bs-target="#templatemo_search">
                           <i class="fa fa-fw fa-search text-dark mr-2"></i>
                       </a>
-                      <a class="nav-icon position-relative text-decoration-none" href="#">
-                          <i class="fa fa-fw fa-cart-arrow-down text-dark mr-1"></i>
-                          <span class="position-absolute top-0 left-100 translate-middle badge rounded-pill bg-light text-dark">7</span>
-                      </a>
-                      <a class="nav-icon position-relative text-decoration-none" href="#">
-                          <i class="fa fa-fw fa-user text-dark mr-3"></i>
-                          <span class="position-absolute top-0 left-100 translate-middle badge rounded-pill bg-light text-dark">+99</span>
-                      </a>
+                        <Badge color="secondary" badgeContent={itemCount}>
+                            <ShoppingCartIcon />{" "}
+                        </Badge>
                   </div>
               </div>
 
@@ -150,7 +148,7 @@ export default function UserLandingPage() {
         const cols =  8;
         const rows =  2;
 
-        return (
+        return (        <Box>
                         <ImageListItem key={item.wImageUrl} cols={cols} rows={rows}>
                           <img
                             {...srcset(item.wImageUrl, 125, 100, rows, cols)}
@@ -176,6 +174,25 @@ export default function UserLandingPage() {
                             actionPosition="left"
                           />
                         </ImageListItem>
+                        <ButtonGroup>
+                        <Button
+                        onClick={() => {
+                         setItemCount(Math.max(itemCount - 1, 0));
+                             }}
+                        >
+                            {" "}
+                        <RemoveIcon fontSize="small" />
+                        </Button>
+                        <Button
+                            onClick={() => {
+                            setItemCount(itemCount + 1);
+                            }}
+                         >
+                             {" "}
+                            <AddIcon fontSize="small" />        
+                         </Button>
+                         </ButtonGroup>
+                        </Box>
                       );
                     })}
                   </ImageList>
