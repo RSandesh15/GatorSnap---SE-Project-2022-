@@ -5,6 +5,11 @@ import Dashboard from './pages/Dashboard';
 import SignUp from './pages/SignUp';
 import ShowcaseImages from './Components/ShowcaseImages';
 import SellerLogin from './pages/SellerLogin';
+import SellerUploadPage from './pages/SellerUploadPage';
+import UserLandingPage from './pages/userLandingPage';
+
+
+
  
 function App() {
   return ( <div >
@@ -14,6 +19,9 @@ function App() {
       <Route exact path = "/Dashboard" component={Dashboard} />
       <Route exact path = "/SignUp" component={SignUp} />
       <Route exact path = "/SellerLogin" component={SellerLogin} />
+      <Route exact path = "/SellerUploadPage" component={SellerUploadPage} />
+      <Route exact path = "/userLandingPage" component={UserLandingPage} />
+      
     </Switch> 
     </div>
   );

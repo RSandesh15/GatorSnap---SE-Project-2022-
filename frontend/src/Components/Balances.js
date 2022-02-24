@@ -12,7 +12,7 @@ export default function Balances() {
     <React.Fragment>
       <Title>Total Balance</Title>
       <Typography component="p" variant="h4">
-        $ 0.00
+        $ 3213.00
       </Typography>
       <Typography color="text.secondary" sx={{ flex: 1 }}>
         on 15 March, 2019

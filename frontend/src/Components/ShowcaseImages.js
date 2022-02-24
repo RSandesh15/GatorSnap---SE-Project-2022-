@@ -7,6 +7,16 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import data from "../data.json"
 import Title from './Title';
 import Typography from '@mui/material/Typography';
+import {
+  Button,
+  TextField,
+  Grid,
+  Paper,
+  AppBar,
+  Toolbar,
+  
+  } from "@material-ui/core";
+import { Axios } from 'axios';
 
 function srcset(image, width, height, rows = 1, cols = 1) {
   return {
@@ -18,16 +28,123 @@ function srcset(image, width, height, rows = 1, cols = 1) {
 }
 
 export default function ShowcaseImages() {
+  React.useEffect(()=> {
+    Axios.get("http://localhost:8888/fetchImages").then((Response)=>{
+      console.log(Response)
+    }); 
+  },[]);
   return (
+    
     <div>
-      <div>
-      <Typography component="h2" variant="h6" color="primary" gutterBottom>
-      GatorSnap
-    </Typography>
-    </div>
+      <AppBar position="static" alignitems="center" color="primary">
+      <Toolbar>
+<Grid container justify="center" wrap="wrap">
+<Grid item>
+<Typography variant="h6">GatorSnaps!</Typography>
+</Grid>
+</Grid>
+</Toolbar>
+</AppBar>
+    
       
     <center>
     
+    <h1 className="text-center">Images by Seller 1</h1>
+
+    <ImageList
+      sx={{
+        width: 500,
+        height: 450,
+        // Promote the list into its own layer in Chrome. This costs memory, but helps keeping high FPS.
+        transform: 'translateZ(0)',
+      }}
+      rowHeight={200}
+      gap={1}
+    >
+      {itemData.map((item) => {
+        const cols = item.featured ? 2 : 1;
+        const rows = item.featured ? 2 : 1;
+
+        return (
+          
+          <ImageListItem key={item.img} cols={cols} rows={rows}>
+            <img
+              {...srcset(item.img, 250, 200, rows, cols)}
+              alt={item.title}
+              loading="lazy"
+            />
+            <ImageListItemBar
+              sx={{
+                background:
+                  'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' +
+                  'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
+              }}
+              title={item.title}
+              position="top"
+              actionIcon={
+                <IconButton
+                  sx={{ color: 'white' }}
+                  aria-label={`star ${item.title}`}
+                >
+                  <StarBorderIcon />
+                </IconButton>
+              }
+              actionPosition="left"
+            />
+          </ImageListItem>
+        );
+      })}
+    </ImageList>
+
+    <h1 className="text-center">Images by seller 2 </h1>
+
+    <ImageList
+      sx={{
+        width: 500,
+        height: 450,
+        // Promote the list into its own layer in Chrome. This costs memory, but helps keeping high FPS.
+        transform: 'translateZ(0)',
+      }}
+      rowHeight={200}
+      gap={1}
+    >
+      {itemData.map((item) => {
+        const cols = item.featured ? 2 : 1;
+        const rows = item.featured ? 2 : 1;
+
+        return (
+          <ImageListItem key={item.img} cols={cols} rows={rows}>
+            <img
+              {...srcset(item.img, 250, 200, rows, cols)}
+              alt={item.title}
+              loading="lazy"
+            />
+            <ImageListItemBar
+              sx={{
+                background:
+                  'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' +
+                  'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
+              }}
+              title={item.title}
+              position="top"
+              actionIcon={
+                <IconButton
+                  sx={{ color: 'white' }}
+                  aria-label={`star ${item.title}`}
+                >
+                  <StarBorderIcon />
+                </IconButton>
+              }
+              actionPosition="left"
+            />
+          </ImageListItem>
+        );
+      })}
+    </ImageList>
+
+    <h1 className="text-center">Images by seller 3 </h1>
+
+
     <ImageList
       sx={{
         width: 500,

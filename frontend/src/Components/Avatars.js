@@ -2,7 +2,17 @@ import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import { CenterFocusStrong } from '@mui/icons-material';
-
+import {
+  Button,
+  TextField,
+  Grid,
+  Paper,
+  AppBar,
+  Typography,
+  Toolbar,
+  
+  } from "@material-ui/core";
+  import { Link } from 'react-router-dom';
 
 export default function Avatars() {
   return (
@@ -14,7 +24,10 @@ export default function Avatars() {
       />
       <div>
          <h1>Name : Suraj Mishra</h1> 
-         <h4>Buyer</h4>
+        <Link to = '/SellerUploadPage'>
+        ADD IMAGES!
+        </Link>
+        
       </div>
       </center>
       
