@@ -29,12 +29,13 @@ func (a *App) InitializeApplication() {
 	a.migrateSchemas()
 	a.setRouters()
 	// a.InsertImage()
-	a.setupGenreCategories()
+	// a.setupGenreCategories()
 }
 
 func (a *App) InsertImage() {
 	// Read the values from the request parameter r here which is sent from the UI
 	for x := 0; x < 20; x++ {
+		// TODO: Reading from the request parameter r for finding the corresponding values
 		if a.DB.Create(&models.Image{
 			SellerEmailId: "bruh@ufl.edu",
 			Title:         "Shooting star",

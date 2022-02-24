@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"se_uf/gator_snapstore/models"
@@ -42,33 +41,6 @@ func TestGetAllImagesAndCompareStruct(t *testing.T) {
 	checkContentType(r, t)
 	checkBody(r.Body, image, t)
 }
-
-func TestAddToCartWhenExists(t *testing.T) {
-    app := initApp()
-    var rqBody = toReader(`{"buyerEmailId":"jim@ufl.edu", "ID":10}`)
-    req, _ := http.NewRequest("POST", "/addToCart", rqBody)
-    r := httptest.NewRecorder()
-    handler := http.HandlerFunc(app.addToCart)
-    handler.ServeHTTP(r, req)
-
-    checkStatusCode(r.Code, http.StatusOK, t)
-    checkContentType(r, t)
-    print(r.Body.String())
-    type IncomingData struct {
-        Message string `json:"message"`
-    }
-    var dataMap map[string]IncomingData
-    err := json.Unmarshal(r.Body.Bytes(), &dataMap)
-    if err != nil {
-        fmt.Println("Error in Unmarshalling: ", err.Error())
-    }
-    // processedImageId, _ := strconv.Atoi(imageIdToBePassed)
-    if dataMap["data"].Message != "Added to cart" {
-        t.Errorf("Add to cart failed")
-    }
-}
-
-// TODO: Create API to check if genre categories are being returned correctly or not
 
 func TestFetchProductInfoWhenExists(t *testing.T) {
 	app := initApp()
@@ -119,7 +91,6 @@ func initApp() App {
 	db, _ := gorm.Open(sqlite.Open("gatorsnapstore.db"), &gorm.Config{})
 	db.AutoMigrate(&models.Image{})
 	db.AutoMigrate(&models.Genre{})
-	db.AutoMigrate(&models.Cart{})
 	return App{DB: db}
 }
 
@@ -159,8 +130,4 @@ func checkBody(body *bytes.Buffer, image *models.Image, t *testing.T) {
 	if image.ImageId != firstProductCatalogue.ImageId {
 		t.Errorf("Wrong body: got %v want %v", dataMap["data"][0], image)
 	}
-}
-
-func toReader(content string) io.Reader {
-	return bytes.NewBuffer([]byte(content))
 }
