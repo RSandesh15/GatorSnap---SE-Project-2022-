@@ -73,6 +73,12 @@ func AddImageToCart(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		SendErrorResponse(w, http.StatusInternalServerError, "Error unmarshaling ATC data")
 		return
 	}
+	// TODO: Check if the user buyerEmailId exists or not
+	// _, flag := checkIfBuyerEmailIdExistsOrNot(DB, data.ImageId)
+	// if !flag {
+	// 	SendErrorResponse(w, http.StatusInternalServerError, "Image Id is not valid, adding to cart failed")
+	// 	return
+	// }
 	_, flag := checkIfImageExistsOrNot(DB, data.ImageId)
 	if !flag {
 		SendErrorResponse(w, http.StatusInternalServerError, "Image Id is not valid, adding to cart failed")
