@@ -117,6 +117,7 @@ func initApp() App {
 	db, _ := gorm.Open(sqlite.Open("gatorsnapstore.db"), &gorm.Config{})
 	db.AutoMigrate(&models.Image{})
 	db.AutoMigrate(&models.Genre{})
+	db.AutoMigrate(&models.Cart{})
 	return App{DB: db}
 }
 
