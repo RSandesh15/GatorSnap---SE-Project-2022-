@@ -70,18 +70,18 @@ func AddImageToCart(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	var data ATCData
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		SendErrorResponse(w, http.StatusInternalServerError, "Error unmarshaling ATC data")
+		SendErrorResponse(w, http.StatusNotFound, "Error unmarshaling ATC data")
 		return
 	}
 	// TODO: Check if the user buyerEmailId exists or not
 	// _, flag := checkIfBuyerEmailIdExistsOrNot(DB, data.ImageId)
 	// if !flag {
-	// 	SendErrorResponse(w, http.StatusInternalServerError, "Image Id is not valid, adding to cart failed")
+	// 	SendErrorResponse(w, http.StatusNotFound, "Image Id is not valid, adding to cart failed")
 	// 	return
 	// }
 	_, flag := checkIfImageExistsOrNot(DB, data.ImageId)
 	if !flag {
-		SendErrorResponse(w, http.StatusInternalServerError, "Image Id is not valid, adding to cart failed")
+		SendErrorResponse(w, http.StatusNotFound, "Resource not found")
 		return
 	}
 	if DB.Create(&models.Cart{
@@ -110,12 +110,12 @@ func DeleteImageFromCart(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	var data DFCData
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		SendErrorResponse(w, http.StatusInternalServerError, "Error unmarshaling DFC data")
+		SendErrorResponse(w, http.StatusNotFound, "Error unmarshaling DFC data")
 		return
 	}
 	_, flag := checkIfImageExistsOrNot(DB, data.ImageId)
 	if !flag {
-		SendErrorResponse(w, http.StatusInternalServerError, "Image Id is not valid, deleting from cart failed")
+		SendErrorResponse(w, http.StatusInternalServerError, "Resource not found")
 		return
 	}
 	var dataToBeDeletedFromCart models.Cart

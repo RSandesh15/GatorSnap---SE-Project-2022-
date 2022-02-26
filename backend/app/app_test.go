@@ -44,28 +44,48 @@ func TestGetAllImagesAndCompareStruct(t *testing.T) {
 }
 
 func TestAddToCartWhenExists(t *testing.T) {
-    app := initApp()
-    var rqBody = toReader(`{"buyerEmailId":"jim@ufl.edu", "ID":10}`)
-    req, _ := http.NewRequest("POST", "/addToCart", rqBody)
-    r := httptest.NewRecorder()
-    handler := http.HandlerFunc(app.addToCart)
-    handler.ServeHTTP(r, req)
+	app := initApp()
+	var rqBody = toReader(`{"buyerEmailId":"jim@ufl.edu", "imageId":10}`)
+	req, _ := http.NewRequest("POST", "/addToCart", rqBody)
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.addToCart)
+	handler.ServeHTTP(r, req)
 
-    checkStatusCode(r.Code, http.StatusOK, t)
-    checkContentType(r, t)
-    print(r.Body.String())
-    type IncomingData struct {
-        Message string `json:"message"`
-    }
-    var dataMap map[string]IncomingData
-    err := json.Unmarshal(r.Body.Bytes(), &dataMap)
-    if err != nil {
-        fmt.Println("Error in Unmarshalling: ", err.Error())
-    }
-    // processedImageId, _ := strconv.Atoi(imageIdToBePassed)
-    if dataMap["data"].Message != "Added to cart" {
-        t.Errorf("Add to cart failed")
-    }
+	checkStatusCode(r.Code, http.StatusOK, t)
+	checkContentType(r, t)
+	// print(r.Body.String())
+	// type IncomingData struct {
+	//     Message string `json:"message"`
+	// }
+	var dataMap map[string]map[string]string
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	if dataMap["data"]["message"] != "Added to cart" {
+		t.Errorf("Add to cart failed when exists")
+	}
+}
+
+func TestAddToCartWhenDoesNotExists(t *testing.T) {
+	app := initApp()
+	var rqBody = toReader(`{"buyerEmailId":"jim@ufl.edu", "imageId":-1}`)
+	req, _ := http.NewRequest("POST", "/addToCart", rqBody)
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.addToCart)
+	handler.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusNotFound, t)
+	checkContentType(r, t)
+	print(r.Body.String())
+	var dataMap map[string]map[string]string
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	if dataMap["data"]["error"] != "Resource not found" {
+		t.Errorf("Add to cart when does not exist failed")
+	}
 }
 
 func TestFetchProductInfoWhenExists(t *testing.T) {
