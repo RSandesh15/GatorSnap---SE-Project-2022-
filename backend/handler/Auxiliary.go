@@ -70,7 +70,7 @@ func AddImageToCart(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	var data ATCData
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		SendErrorResponse(w, http.StatusNotFound, "Error unmarshaling ATC data")
+		SendErrorResponse(w, http.StatusNotFound, "Error unmarshaling")
 		return
 	}
 	// TODO: Check if the user buyerEmailId exists or not
@@ -110,7 +110,7 @@ func DeleteImageFromCart(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	var data DFCData
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		SendErrorResponse(w, http.StatusNotFound, "Error unmarshaling DFC data")
+		SendErrorResponse(w, http.StatusNotFound, "Error unmarshaling")
 		return
 	}
 	_, flag := checkIfImageExistsOrNot(DB, data.ImageId)
