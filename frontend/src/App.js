@@ -8,6 +8,7 @@ import SellerLogin from './pages/SellerLogin';
 import SellerUploadPage from './pages/SellerUploadPage';
  
 function App() {
+  console.log("Temp")
   return ( <div >
     <Switch>
       <Route exact path = "/"component = {Login} />
