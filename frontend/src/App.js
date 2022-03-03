@@ -12,6 +12,7 @@ import UserLandingPage from './pages/userLandingPage';
 
  
 function App() {
+  console.log("Temp")
   return ( <div >
     <Switch>
       <Route exact path = "/"component = {Login} />
