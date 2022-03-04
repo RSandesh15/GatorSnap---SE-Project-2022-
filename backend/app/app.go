@@ -28,8 +28,8 @@ func (a *App) InitializeApplication() {
 	a.DB = db
 	a.migrateSchemas()
 	a.setRouters()
-	// a.InsertImage()
-	// a.setupGenreCategories()
+	a.InsertImage()
+	a.setupGenreCategories()
 }
 
 func (a *App) InsertImage() {

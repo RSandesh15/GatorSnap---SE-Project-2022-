@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"se_uf/gator_snapstore/models"
 	"strconv"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -228,15 +229,49 @@ func UploadSellerImage(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		SendErrorResponse(w, http.StatusInternalServerError, "Error parsing multipart file data")
 		return
 	}
- 	// sellerEmailId := r.FormValue("sellerEmailId")
-	// title := r.FormValue("title")
-	// description := r.FormValue("description")
-	// price := r.FormValue("price")
+	sellerEmailId := r.FormValue("sellerEmailId")
+	title := r.FormValue("title")
+	description := r.FormValue("description")
+	priceInString := r.FormValue("price")
+	price, err := strconv.ParseFloat(priceInString, 32)
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, "Error parsing multipart file data")
+		return
+	}
 	// Inserting the image details in the database:
-
-	// TODO: Storing the wfileURLPath and fileURLPath in the image database along with the other details
-
-	// Inserting the genre details in the database:
+	if DB.Create(&models.Image{
+		SellerEmailId: sellerEmailId,
+		Title:         title,
+		Description:   description,
+		Price:         float32(price),
+		UploadedAt:    time.Now(),
+		ImageURL:      originalImageURL,
+		WImageURL:     waterMarkedImageURL,
+	}).Error != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Image Schema")
+		return
+	}
+	var genres []string
+	r.ParseForm()
+	for key, value := range r.Form {
+		if key == "genres[]" {
+			genres = value
+			break
+		}
+	}
+	var allImages *models.Image
+	var lastInsertedImageId int64
+	DB.Find(&allImages).Count(&lastInsertedImageId)
+	for _, genre := range genres {
+		if DB.Create(&models.Genre{
+			ImageId:   int(lastInsertedImageId),
+			GenreType: string(genre),
+		}).Error != nil {
+			SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Genre Schema")
+			return
+		}
+	}
+	SendJSONResponse(w, http.StatusOK, map[string]string{"message": "Image uploaded successfully"})
 }
 
 // UploadFileToS3 saves a file to aws bucket and returns the url to // the file and an error if there's any

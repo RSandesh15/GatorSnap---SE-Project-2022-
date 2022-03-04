@@ -24,7 +24,7 @@ type ProductCatalogue struct {
 }
 
 type Genre struct {
-	ImageId   int `gorm:"primaryKey"`
+	ImageId   int
 	GenreType string
 }
 
