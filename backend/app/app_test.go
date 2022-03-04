@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"se_uf/gator_snapstore/handler"
 	"se_uf/gator_snapstore/models"
 	"strconv"
 	"testing"
@@ -41,6 +42,34 @@ func TestGetAllImagesAndCompareStruct(t *testing.T) {
 	checkStatusCode(r.Code, http.StatusOK, t)
 	checkContentType(r, t)
 	checkBody(r.Body, image, t)
+}
+
+func TestFetchGenreCateogires(t *testing.T) {
+
+	app := initApp()
+	app.setupGenreCategories()
+	req, _ := http.NewRequest("GET", "/fetchGenreCategories", nil)
+	r := httptest.NewRecorder()
+	handler_ := http.HandlerFunc(app.getGenreCategories)
+	handler_.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusOK, t)
+	checkContentType(r, t)
+
+	// print(r.Body.String())
+
+	var dataMap map[string][]string
+
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	for index, genre := range handler.GenreCategorySlice {
+		if genre != dataMap["data"][index] {
+			t.Errorf("Error in fetching genre categories test")
+		}
+	}
 }
 
 func TestAddToCartWhenExists(t *testing.T) {
@@ -84,7 +113,7 @@ func TestAddToCartWhenDoesNotExists(t *testing.T) {
 		fmt.Println("Error in Unmarshalling: ", err.Error())
 	}
 	if dataMap["data"]["error"] == "Resource not found" || dataMap["data"]["error"] == "Error unmarshaling" {
-		
+
 	} else {
 		t.Errorf("Add to cart when does not exist failed")
 	}
@@ -140,6 +169,7 @@ func initApp() App {
 	db.AutoMigrate(&models.Image{})
 	db.AutoMigrate(&models.Genre{})
 	db.AutoMigrate(&models.Cart{})
+	db.AutoMigrate(&models.GenreCategories{})
 	return App{DB: db}
 }
 
