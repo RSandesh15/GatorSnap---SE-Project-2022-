@@ -1,5 +1,5 @@
 import React from "react";
-import {
+import{
 Button,
 TextField,
 Grid,
@@ -12,7 +12,11 @@ Toolbar,
 import { Link } from 'react-router-dom';
 
 
+
+
+
 class Login extends React.Component {
+    
 constructor(props) {
 super(props);
 this.state = { username: "", password:"", authflag:1 };
@@ -31,6 +35,7 @@ this.props.history.push("/ShowcaseImages");
 alert('Incorrect Credntials!');
 }
 }
+
 render() {
 return (
 <div>
@@ -132,7 +137,11 @@ Create New Account!
 </Grid>
 </Grid>
 </Grid>
+
+        
+                        
 </div>
+
 );
 }
 }
