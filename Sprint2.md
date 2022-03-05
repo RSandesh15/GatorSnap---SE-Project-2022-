@@ -204,3 +204,11 @@ func TestGetAllImagesAndCompareStruct(t *testing.T) {
 
 Here is a walkthrough of what was achieved on the backend and database side for sprint 2. 
 <img src='Gifs/PostMan-and-watermarking.gif' title='Backend' width='' />
+
+
+
+### Frontend
+The first step is to install the test runner. We use the following command to install the cypress dependency:
+npm install cypress --save-dev
+
+Once this is done, a cypress library is created containing several default testcases. To create our own testcases we must create a .js file in the integration segment of the cypress file. Once we've created that file, we should see the Cypress Test Runner immediately display it in the list of Integration Tests. Cypress monitors your spec files for any changes and automatically displays any changes. 
