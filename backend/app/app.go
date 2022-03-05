@@ -28,23 +28,22 @@ func (a *App) InitializeApplication() {
 	a.DB = db
 	a.migrateSchemas()
 	a.setRouters()
-	// Set the request and response parameters for insertImage()
-	// a.insertImage()
-	// a.setupGenreCategories()
+	a.InsertImage()
+	a.setupGenreCategories()
 }
 
-func (a *App) insertImage() {
+func (a *App) InsertImage() {
 	// Read the values from the request parameter r here which is sent from the UI
 	for x := 0; x < 20; x++ {
 		// TODO: Reading from the request parameter r for finding the corresponding values
 		if a.DB.Create(&models.Image{
-			EmailId:     "bruh@ufl.edu",
-			Title:       "Shooting star",
-			Description: "Good photo!",
-			Price:       150.25,
-			UploadedAt:  time.Now(),
-			ImageURL:    "https://picsum.photos/200", // Insert the original Image url obtained from the bucket
-			WImageURL:   "https://picsum.photos/200", // Insert the watermarked Image url obtained from the bucket
+			SellerEmailId: "bruh@ufl.edu",
+			Title:         "Shooting star",
+			Description:   "Good photo!",
+			Price:         150.25,
+			UploadedAt:    time.Now(),
+			ImageURL:      "https://picsum.photos/200", // Insert the original Image url obtained from the bucket
+			WImageURL:     "https://picsum.photos/200", // Insert the watermarked Image url obtained from the bucket
 		}).Error != nil {
 			// handler.SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Image Schema")
 			fmt.Printf("Error inserting in Image Schema")
@@ -82,6 +81,8 @@ func (a *App) migrateSchemas() {
 	a.DB.AutoMigrate(&models.Image{})
 	a.DB.AutoMigrate(&models.Genre{})
 	a.DB.AutoMigrate(&models.GenreCategories{})
+	a.DB.AutoMigrate(&models.Cart{})
+	a.DB.AutoMigrate(&models.PreviousOrders{})
 }
 
 func (a *App) RunApplication(port string) {
@@ -91,9 +92,12 @@ func (a *App) RunApplication(port string) {
 func (a *App) setRouters() {
 	a.Router.HandleFunc("/fetchImages", a.getAllImages).Methods("GET")
 	//a.Router.HandleFunc("/postform", postFormHandler).Methods("POST")
-
 	a.Router.HandleFunc("/fetchGenreCategories", a.getGenreCategories).Methods("GET")
-	a.Router.HandleFunc("/uploadSellerImage", a.uploadSellerImage).Methods("GET") // Change this to POST
+	a.Router.HandleFunc("/uploadSellerImage", a.uploadSellerImage).Methods("POST")
+	a.Router.HandleFunc("/fetchProductInfo/{imageId}", a.getProductInfo).Methods("GET")
+	a.Router.HandleFunc("/fetchCartInfo/{buyerEmailId}", a.fetchCartInfo).Methods("GET")
+	a.Router.HandleFunc("/addToCart", a.addToCart).Methods("POST")
+	a.Router.HandleFunc("/deleteFromCart", a.deleteFromCart).Methods("POST")
 }
 
 func (a *App) getAllImages(w http.ResponseWriter, r *http.Request) {
@@ -113,4 +117,20 @@ func (a *App) getGenreCategories(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) uploadSellerImage(w http.ResponseWriter, r *http.Request) {
 	handler.UploadSellerImage(a.DB, w, r)
+}
+
+func (a *App) getProductInfo(w http.ResponseWriter, r *http.Request) {
+	handler.GetProductInfo(a.DB, w, r)
+}
+
+func (a *App) fetchCartInfo(w http.ResponseWriter, r *http.Request) {
+	handler.FetchCartInfo(a.DB, w, r)
+}
+
+func (a *App) addToCart(w http.ResponseWriter, r *http.Request) {
+	handler.AddImageToCart(a.DB, w, r)
+}
+
+func (a *App) deleteFromCart(w http.ResponseWriter, r *http.Request) {
+	handler.DeleteImageFromCart(a.DB, w, r)
 }

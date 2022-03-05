@@ -6,5 +6,5 @@ func main() {
 	app := &app.App{}
 
 	app.InitializeApplication()
-	app.RunApplication(":8888")
+	app.RunApplication(":8085")
 }
