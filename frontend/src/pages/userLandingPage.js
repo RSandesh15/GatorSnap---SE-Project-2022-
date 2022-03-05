@@ -13,6 +13,7 @@ import ButtonGroup from "@material-ui/core/ButtonGroup";
 import AddIcon from "@material-ui/icons/Add";
 import RemoveIcon from "@material-ui/icons/Remove";
 import '../App1.css';
+import BasicModal from "../Components/BasicModal";
 
 //Bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -32,13 +33,16 @@ function srcset(image, width, height, rows = 1, cols = 1) {
 
 
 export default function UserLandingPage() {
+
+const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
   const [fetchImages, setFetchedImageData] = useState([]);
   const obj = Object.entries(fetchImages);
 
   
-  
   useEffect(() => {
-    axios.get("http://localhost:8888/fetchImages").then((response) => {
+    axios.get("http://localhost:8085/fetchImages").then((response) => {
       debugger;
       setFetchedImageData(response.data.data);
       console.log(fetchImages);
@@ -191,16 +195,15 @@ export default function UserLandingPage() {
                              {" "}
                             <AddIcon fontSize="small" />        
                          </Button>
-                         </ButtonGroup>
-                        </Box>
-                      );
-                    })}
+                         <Button onClick={handleOpen}>Details</Button>
+                         {open && <BasicModal/>}
+
+                           </ButtonGroup>
+                            </Box>      
+                              );
+                              })}
                   </ImageList>
         </div>
-
-
-
-      
         
         
         <section class="container py-5">
@@ -216,18 +219,18 @@ export default function UserLandingPage() {
           </div>
           <div class="row">
               <div class="col-12 col-md-4 p-5 mt-3">
-                  <a href="#"><img src="https://therichpost.com/wp-content/uploads/2021/05/category_img_01.jpg" class="rounded-circle img-fluid border" /></a>
-                  <h5 class="text-center mt-3 mb-3">Watches</h5>
+                  <a href="#"><img src="https://www.cianellistudios.com/images/abstract-art/abstract-art-celebration.jpg" class="rounded-circle img-fluid border" /></a>
+                  <h5 class="text-center mt-3 mb-3">Nature</h5>
                   <p class="text-center"><a class="btn btn-success">Go Shop</a></p>
               </div>
               <div class="col-12 col-md-4 p-5 mt-3">
-                  <a href="#"><img src="https://therichpost.com/wp-content/uploads/2021/05/category_img_02.jpg" class="rounded-circle img-fluid border" /></a>
-                  <h2 class="h5 text-center mt-3 mb-3">Shoes</h2>
+                  <a href="#"><img src="https://www.cianellistudios.com/images/abstract-art/abstract-art-canvas-prints-me5.jpg" class="rounded-circle img-fluid border" /></a>
+                  <h2 class="h5 text-center mt-3 mb-3">Abstract</h2>
                   <p class="text-center"><a class="btn btn-success">Go Shop</a></p>
               </div>
               <div class="col-12 col-md-4 p-5 mt-3">
-                  <a href="#"><img src="https://therichpost.com/wp-content/uploads/2021/05/category_img_03.jpg" class="rounded-circle img-fluid border" /></a>
-                  <h2 class="h5 text-center mt-3 mb-3">Accessories</h2>
+                  <a href="#"><img src="https://www.cianellistudios.com/images/abstract-art/abstract-art-celebration.jpg" class="rounded-circle img-fluid border" /></a>
+                  <h2 class="h5 text-center mt-3 mb-3">Art</h2>
                   <p class="text-center"><a class="btn btn-success">Go Shop</a></p>
               </div>
           </div>
@@ -249,7 +252,7 @@ export default function UserLandingPage() {
                   <div class="col-12 col-md-4 mb-4">
                       <div class="card h-100">
                           <a href="#">
-                              <img src="https://therichpost.com/wp-content/uploads/2021/05/feature_prod_01.jpg" class="card-img-top" alt="..." />
+                              <img src="https://www.cianellistudios.com/images/abstract-art/abstract-art-canvas-prints-ref1.jpg" class="card-img-top" alt="..." />
                           </a>
                           <div class="card-body">
                               <ul class="list-unstyled d-flex justify-content-between">
@@ -273,7 +276,7 @@ export default function UserLandingPage() {
                   <div class="col-12 col-md-4 mb-4">
                       <div class="card h-100">
                           <a href="#">
-                              <img src="https://therichpost.com/wp-content/uploads/2021/05/feature_prod_02.jpg" class="card-img-top" alt="..." />
+                              <img src="https://www.cianellistudios.com/images/abstract-art/abstract-art-canvas-prints-romance1.jpg" class="card-img-top" alt="..." />
                           </a>
                           <div class="card-body">
                               <ul class="list-unstyled d-flex justify-content-between">
@@ -297,7 +300,7 @@ export default function UserLandingPage() {
                   <div class="col-12 col-md-4 mb-4">
                       <div class="card h-100">
                           <a href="#">
-                              <img src="https://therichpost.com/wp-content/uploads/2021/05/feature_prod_03.jpg" class="card-img-top" alt="..." />
+                              <img src="https://www.cianellistudios.com/images/abstract-art/abstract-art-canvas-prints-sg1b.jpg" class="card-img-top" alt="..." />
                           </a>
                           <div class="card-body">
                               <ul class="list-unstyled d-flex justify-content-between">
@@ -327,7 +330,7 @@ export default function UserLandingPage() {
               <div class="row">
 
                   <div class="col-md-4 pt-5">
-                      <h2 class="h2 text-success border-bottom pb-3 border-light logo">Jassa Shop</h2>
+                      <h2 class="h2 text-success border-bottom pb-3 border-light logo"></h2>
                       <ul class="list-unstyled text-light footer-link-list">
                           <li>
                               <i class="fas fa-map-marker-alt fa-fw"></i>
@@ -348,12 +351,10 @@ export default function UserLandingPage() {
                       <h2 class="h2 text-light border-bottom pb-3 border-light">Products</h2>
                       <ul class="list-unstyled text-light footer-link-list">
                           <li><a class="text-decoration-none" href="#">Luxury</a></li>
-                          <li><a class="text-decoration-none" href="#">Sport Wear</a></li>
-                          <li><a class="text-decoration-none" href="#">Men's Shoes</a></li>
-                          <li><a class="text-decoration-none" href="#">Women's Shoes</a></li>
-                          <li><a class="text-decoration-none" href="#">Popular Dress</a></li>
-                          <li><a class="text-decoration-none" href="#">Gym Accessories</a></li>
-                          <li><a class="text-decoration-none" href="#">Sport Shoes</a></li>
+                          <li><a class="text-decoration-none" href="#">Sports</a></li>
+                          <li><a class="text-decoration-none" href="#">Nature</a></li>
+                          <li><a class="text-decoration-none" href="#">Tourist Places</a></li>
+                          
                       </ul>
                   </div>
 
@@ -362,7 +363,7 @@ export default function UserLandingPage() {
                       <ul class="list-unstyled text-light footer-link-list">
                           <li><a class="text-decoration-none" href="#">Home</a></li>
                           <li><a class="text-decoration-none" href="#">About Us</a></li>
-                          <li><a class="text-decoration-none" href="#">Shop Locations</a></li>
+                          <li><a class="text-decoration-none" href="#">Locations</a></li>
                           <li><a class="text-decoration-none" href="#">FAQs</a></li>
                           <li><a class="text-decoration-none" href="#">Contact</a></li>
                       </ul>
@@ -405,8 +406,8 @@ export default function UserLandingPage() {
                   <div class="row pt-2">
                       <div class="col-12">
                           <p class="text-left text-light">
-                              Copyright &copy; 2021 Company Name 
-                              | Designed by <a rel="sponsored" href="#" target="_blank">Jassa</a>
+                              Copyright &copy; 2021 Gator Snaps 
+                              | Designed by <a rel="sponsored" href="#" target="_blank">Gators</a>
                           </p>
                       </div>
                   </div>
