@@ -200,7 +200,20 @@ func TestGetAllImagesAndCompareStruct(t *testing.T) {
 }
 ``` 
 
+
+### Frontend:
+- / addtoCart : Added functionality of adding to cart features selected by user. Using 'useState' hooks implemented dynamic addition and subtraction of items into the cart.
+
+- / searchBar: created a searchbar for user to find products via title, genre etc. Intend to connect it with backend to display possible matches for the user.
+
+- / Modal : The user can click on details to view a pop-up window. This window calls an API fetchImageDetails. We send imageId to retrieve information of particular image. The data fetched is processed and displayed to the user in this pop-up window. Thus overall making the user interface seamless as the website does not populate all the data in the same webpage but instead offers details in pop-up window.
+
+-/ The User Landing Page is enhanced with Categories of the month, and Popular products section. The webPage uses ample features/components imported via React Material. 
+
 ### Video Walkthrough
 
 Here is a walkthrough of what was achieved on the backend and database side for sprint 2. 
 <img src='Gifs/PostMan-and-watermarking.gif' title='Backend' width='' />
+
+Here is a walkthrough of what was achieved on the frontend side for sprint 2. 
+<img src ='Gifs/Frontend(UserLandingPage)-Sprint2.gif' title='Frontend' width = '' />
