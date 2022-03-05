@@ -215,4 +215,5 @@ func TestGetAllImagesAndCompareStruct(t *testing.T) {
 Here is a walkthrough of what was achieved on the backend and database side for sprint 2. 
 <img src='Gifs/PostMan-and-watermarking.gif' title='Backend' width='' />
 
-
+Here is a walkthrough of what was achieved on the frontend side for sprint 2. 
+<img src='Gifs/Frontend(UserLandingPage)-Sprint2.gif' title='Frontend' width='' />
