@@ -98,6 +98,7 @@ func (a *App) setRouters() {
 	a.Router.HandleFunc("/fetchCartInfo/{buyerEmailId}", a.fetchCartInfo).Methods("GET")
 	a.Router.HandleFunc("/addToCart", a.addToCart).Methods("POST")
 	a.Router.HandleFunc("/deleteFromCart", a.deleteFromCart).Methods("POST")
+	a.Router.HandleFunc("/checkoutAndProcessPayment", a.checkoutAndProcessPayment).Methods("POST")
 }
 
 func (a *App) getAllImages(w http.ResponseWriter, r *http.Request) {
@@ -133,4 +134,8 @@ func (a *App) addToCart(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) deleteFromCart(w http.ResponseWriter, r *http.Request) {
 	handler.DeleteImageFromCart(a.DB, w, r)
+}
+
+func (a *App) checkoutAndProcessPayment(w http.ResponseWriter, r *http.Request) {
+	handler.CheckoutAndProcessPayment(a.DB, w, r)
 }
