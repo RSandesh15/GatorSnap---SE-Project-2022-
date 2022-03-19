@@ -2,27 +2,40 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"se_uf/gator_snapstore/models"
 
 	"github.com/gorilla/mux"
+	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v72/paymentintent"
 	"gorm.io/gorm"
 )
 
 func FetchCartInfo(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	// TODO: Check if the user is authorized to add to the table or not by comparing the buyerEmailId
 	// and the email id from the token received
-	var allProductImages []models.ProductCatalogue
 	params := mux.Vars(r)
 	buyerEmailId := params["buyerEmailId"]
+	allCartProducts, err := fetchCartRecords(DB, w, buyerEmailId)
+	if err != nil {
+		return
+	}
+	SendJSONResponse(w, http.StatusOK, allCartProducts)
+}
+
+func fetchCartRecords(DB *gorm.DB, w http.ResponseWriter, buyerEmailId string) ([]models.ProductCatalogue, error) {
 	var buyerCartProducts models.Cart
 	allBuyerCartProducts := DB.Where(&models.Cart{BuyerEmailId: buyerEmailId}).Find(&buyerCartProducts)
 	rows, err := allBuyerCartProducts.Rows()
 	if err != nil {
 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
-		return
+		return nil, err
 	}
+	var allProductImages []models.ProductCatalogue
 	defer rows.Close()
 	var cartInfo models.Cart
 	for rows.Next() {
@@ -30,12 +43,12 @@ func FetchCartInfo(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		image, flag := checkIfImageExistsOrNot(DB, cartInfo.ImageId)
 		if !flag {
 			SendErrorResponse(w, http.StatusInternalServerError, "Mentioned imageId does not exist in fetch cart info method")
-			return
+			return nil, errors.New("custom error")
 		}
 		imageRow, err := image.Rows()
 		if err != nil {
 			SendErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
+			return nil, err
 		}
 		defer imageRow.Close()
 		var currentImage models.Image
@@ -50,7 +63,7 @@ func FetchCartInfo(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 			allProductImages = append(allProductImages, productCatalogueImage)
 		}
 	}
-	SendJSONResponse(w, http.StatusOK, allProductImages)
+	return allProductImages, nil
 }
 
 func AddImageToCart(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
@@ -132,4 +145,28 @@ func DeleteImageFromCart(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	SendJSONResponse(w, http.StatusOK, map[string]string{"message": "Removed from cart"})
+}
+
+func CheckoutAndProcessPayment(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	// TODO: Check if the user is authorized to delete from the table or not by comparing the buyerEmailId
+	// and the email id from the token received
+	// First computing the total sum of the amount:
+	type CAPPData struct {
+		Token        string // TODO: Update this field later accordingly
+		BuyerEmailId string
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, "Error reading Checkout and process payment from cart JSON data ")
+		return
+	}
+	var data CAPPData
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		SendErrorResponse(w, http.StatusNotFound, "Error unmarshaling")
+		return
+	}
+	println("The Email Address of the buyer: ", data.BuyerEmailId)
+	allCartProducts, err := fetchCartRecords(DB, w, data.BuyerEmailId)
+	fmt.Println(allCartProducts)
 }

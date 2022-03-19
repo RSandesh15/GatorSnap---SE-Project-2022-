@@ -9,6 +9,7 @@ type Cart struct {
 
 type PreviousOrders struct {
 	BuyerEmailId string
-	ImageId int
+	SellerEmailId string
+	Amount int
 	BoughtAt  time.Time
 }
