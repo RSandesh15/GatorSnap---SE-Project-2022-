@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"errors"
 	"image"
 	"image/draw"
 	"image/jpeg"
@@ -322,32 +323,41 @@ func GetProductInfo(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// TODO: Handle the condition when an alphabet is passed as imageId to the API instead of an integer
+	productImageInfo, err := fetchSingleProduct(DB, w, convertedImageId)
+	if err != nil {
+		return
+	}
+	SendJSONResponse(w, http.StatusOK, productImageInfo)
+}
+
+func fetchSingleProduct(DB *gorm.DB, w http.ResponseWriter, convertedImageId int) (models.Image, error) {
+	var productImageInfo models.Image
 	currentImageInfo, flag := checkIfImageExistsOrNot(DB, convertedImageId)
 	if !flag {
 		SendErrorResponse(w, http.StatusNotFound, "Resource not found")
-		return
+		return productImageInfo, errors.New("custom error")
 	}
-
 	imageRow, err := currentImageInfo.Rows()
 	if err != nil {
 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
-		return
+		return productImageInfo, err
 	}
 	defer imageRow.Close()
 	var currentImage models.Image
-	var productImageInfo models.Image
 	for imageRow.Next() {
 		DB.ScanRows(imageRow, &currentImage)
 		productImageInfo = models.Image{
-			ImageId:     currentImage.ImageId,
-			Title:       currentImage.Title,
-			Description: currentImage.Description,
-			Price:       currentImage.Price,
-			UploadedAt:  currentImage.UploadedAt,
-			WImageURL:   currentImage.WImageURL,
+			ImageId:       currentImage.ImageId,
+			SellerEmailId: currentImage.SellerEmailId,
+			Title:         currentImage.Title,
+			Description:   currentImage.Description,
+			Price:         currentImage.Price,
+			UploadedAt:    currentImage.UploadedAt,
+			WImageURL:     currentImage.WImageURL,
+			ImageURL:      currentImage.ImageURL,
 		}
 	}
-	SendJSONResponse(w, http.StatusOK, productImageInfo)
+	return productImageInfo, nil
 }
 
 func checkIfImageExistsOrNot(DB *gorm.DB, imageId int) (*gorm.DB, bool) {

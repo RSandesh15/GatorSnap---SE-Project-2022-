@@ -28,7 +28,7 @@ func (a *App) InitializeApplication() {
 	a.DB = db
 	a.migrateSchemas()
 	a.setRouters()
-	a.InsertImage()
+	// a.InsertImage()
 	a.setupGenreCategories()
 }
 
@@ -48,22 +48,10 @@ func (a *App) InsertImage() {
 			// handler.SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Image Schema")
 			fmt.Printf("Error inserting in Image Schema")
 		}
-		// var lastImage models.Image
-		// temp := a.DB.Last(&models.Image)
-		// row, err  := temp.Rows()
-		// if err != nil {
-		// 	handler.SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Genre Schema")
-		// 	return
-		// }
-		// a.DB.ScanRows(row, lastImage)
-		// lastInsertedImageId := lastImage.ImageId
-		// // Loop for all the available genres passed from the front end
 		if a.DB.Create(&models.Genre{
 			ImageId:   x + 1,
 			GenreType: "nature",
-			// ImageId: lastInsertedImageId,
 		}).Error != nil {
-			// handler.SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Genre Schema")
 			return
 		}
 	}

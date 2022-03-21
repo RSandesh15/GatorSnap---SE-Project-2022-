@@ -3,7 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -223,6 +223,8 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		SendErrorResponse(w, http.StatusNotFound, "Error unmarshaling")
 		return
 	}
+
+	// Fetching the payment data using paymentIntentId:
 	err = godotenv.Load(".env")
 	if err != nil {
 		SendErrorResponse(w, http.StatusInternalServerError, "Error in reading the env file")
@@ -237,14 +239,53 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	paymentMetadata := processedPaymentIntent.Metadata
 	buyerEmailId := paymentMetadata["buyerEmailId"]
 	// println("Email id from the metadata", buyerEmailId, processedPaymentIntent.Amount)
+
 	// TODO: Check if the email id from the token, paymentIntent and email address sent are all the same, only then proceed
-	// fetching all the cart details from the clients secret
+
+	// Fetching all the cart details from the clients secret:
 	allCartProducts, err := fetchCartRecords(DB, w, buyerEmailId)
 	if err != nil {
 		return
 	}
+	// Mailing every product in the buyers cart and updating the previous orders table at the same time
 	for _, cartProduct := range allCartProducts {
-		fmt.Println(cartProduct)
+		// Fetching the imageData that gives us info about the seller email id, the original image url and the amount
+		imageData, err := fetchSingleProduct(DB, w, cartProduct.ImageId)
+		if err != nil {
+			return
+		}
+		originalImage := "originalImage.jpeg"
+		err = downloadOriginalImageFromCloud(imageData.ImageURL, originalImage)
+		if err != nil {
+			println(err)
+			SendErrorResponse(w, http.StatusInternalServerError, "Error downloading image from cloud in email product API")
+			return
+		}
 	}
 	SendJSONResponse(w, http.StatusOK, map[string]string{"message": "Order placed and shipped successfully! Your order has been delivered to your registered email id!"})
+}
+
+func downloadOriginalImageFromCloud(URL, fileName string) error {
+	//Get the response bytes from the url
+	response, err := http.Get(URL)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		return errors.New("received non 200 response code")
+	}
+	//Create a empty file
+	file, err := os.Create(fileName)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	//Write the bytes to the file
+	_, err = io.Copy(file, response.Body)
+	if err != nil {
+		return err
+	}
+	return nil
 }
