@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -203,4 +204,47 @@ func CheckoutAndProcessPayment(DB *gorm.DB, w http.ResponseWriter, r *http.Reque
 	// to make the payment to the user. Following this, the same client_secret will be returned from the frontend in the
 	// API '/processPayment'
 	SendJSONResponse(w, http.StatusOK, map[string]string{"clientSecret": pi.ClientSecret})
+}
+
+func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	type EPData struct {
+		Token           string // TODO: Update this field later accordingly
+		BuyerEmailId    string
+		PaymentIntentId string
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, "Error reading email product JSON data ")
+		return
+	}
+	var data EPData
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		SendErrorResponse(w, http.StatusNotFound, "Error unmarshaling")
+		return
+	}
+	err = godotenv.Load(".env")
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, "Error in reading the env file")
+		return
+	}
+	stripe.Key = os.Getenv("STRIPE_SECRET")
+	processedPaymentIntent, err := paymentintent.Get(data.PaymentIntentId, nil)
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, "Error in extracting data from payment intent")
+		return
+	}
+	paymentMetadata := processedPaymentIntent.Metadata
+	buyerEmailId := paymentMetadata["buyerEmailId"]
+	// println("Email id from the metadata", buyerEmailId, processedPaymentIntent.Amount)
+	// TODO: Check if the email id from the token, paymentIntent and email address sent are all the same, only then proceed
+	// fetching all the cart details from the clients secret
+	allCartProducts, err := fetchCartRecords(DB, w, buyerEmailId)
+	if err != nil {
+		return
+	}
+	for _, cartProduct := range allCartProducts {
+		fmt.Println(cartProduct)
+	}
+	SendJSONResponse(w, http.StatusOK, map[string]string{"message": "Order placed and shipped successfully! Your order has been delivered to your registered email id!"})
 }
