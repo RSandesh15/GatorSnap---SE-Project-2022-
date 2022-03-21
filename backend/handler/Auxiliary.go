@@ -3,13 +3,14 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"se_uf/gator_snapstore/models"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/paymentintent"
 	"gorm.io/gorm"
@@ -166,7 +167,40 @@ func CheckoutAndProcessPayment(DB *gorm.DB, w http.ResponseWriter, r *http.Reque
 		SendErrorResponse(w, http.StatusNotFound, "Error unmarshaling")
 		return
 	}
-	println("The Email Address of the buyer: ", data.BuyerEmailId)
 	allCartProducts, err := fetchCartRecords(DB, w, data.BuyerEmailId)
-	fmt.Println(allCartProducts)
+	if err != nil {
+		return
+	}
+	var amount int64 = 0.0
+	for _, cartProduct := range allCartProducts {
+		amount = amount + int64(cartProduct.Price)
+	}
+	amount = amount * 100
+	// Processing the payment using Stripe payment gateway:
+	err = godotenv.Load(".env")
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, "Error in reading the env file")
+		return
+	}
+	// Loading the stripe secret key from the environment variables
+	stripe.Key = os.Getenv("STRIPE_SECRET")
+	params := &stripe.PaymentIntentParams{
+		Amount:       stripe.Int64(amount),
+		Currency:     stripe.String(string(stripe.CurrencyUSD)),
+		ReceiptEmail: &data.BuyerEmailId,
+	}
+	params.AddMetadata("buyerEmailId", data.BuyerEmailId)
+	pi, err := paymentintent.New(params)
+
+	// println("pi.New: %v", pi.ClientSecret)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("pi.New: %v", err)
+		return
+	}
+	// The output of this API call is that a client secret is returned to the front end with all the information needed
+	// to make the payment to the user. Following this, the same client_secret will be returned from the frontend in the
+	// API '/processPayment'
+	SendJSONResponse(w, http.StatusOK, map[string]string{"clientSecret": pi.ClientSecret})
 }
