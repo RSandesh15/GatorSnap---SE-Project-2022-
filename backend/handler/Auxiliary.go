@@ -6,14 +6,17 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"se_uf/gator_snapstore/models"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/paymentintent"
+	"gopkg.in/gomail.v2"
 	"gorm.io/gorm"
 )
 
@@ -254,21 +257,38 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return
 		}
-		originalImage := "originalImage.jpeg"
-		err = downloadOriginalImageFromCloud(imageData.ImageURL, originalImage)
+
+		fileName := cartProduct.Title + ".jpeg"
+		err = downloadOriginalImageFromCloud(imageData.ImageURL, fileName)
 		if err != nil {
 			println(err)
 			SendErrorResponse(w, http.StatusInternalServerError, "Error downloading image from cloud in email product API")
 			return
 		}
+
+		// TODO: Send email with attachment:
+		msg := gomail.NewMessage()
+		msg.SetHeader("From", os.Getenv("GATORSSUSERNAME"))
+		msg.SetHeader("To", buyerEmailId)
+		msg.SetHeader("Subject", "Your Gator SnapStore purchase is here! ID: "+cartProduct.Title+"_"+strconv.Itoa(rand.Int()))
+		msg.SetBody("text/html", "Thanks for doing business with Gator SnapStore. We have attached your image below. Enjoy it! Go Gators! \nRegards,\nGator SnapStore.")
+		msg.Attach(fileName)
+
+		n := gomail.NewDialer("smtp.gmail.com", 587, os.Getenv("GATORSSUSERNAME"), os.Getenv("GATORSSPASS"))
+		// Send the email
+		if err := n.DialAndSend(msg); err != nil {
+			SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
 		// Deleting the original Image that has been downloaded after a mail has been sent to the user and the previous orders
 		// table has been correctly updated:
-		err = os.Remove("originalImage.jpeg")
+		err = os.Remove(fileName)
 		if err != nil {
 			print("Error in deleting originalImage.jpeg file: ", err.Error())
 		}
-
-		// TODO: Send email with attachment
+		// TODO: remove the following break statement (for testing)
+		break
 
 		// TODO: Update the buyer cart state
 
