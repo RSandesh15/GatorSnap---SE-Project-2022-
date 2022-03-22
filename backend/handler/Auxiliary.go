@@ -261,6 +261,19 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 			SendErrorResponse(w, http.StatusInternalServerError, "Error downloading image from cloud in email product API")
 			return
 		}
+		// Deleting the original Image that has been downloaded after a mail has been sent to the user and the previous orders
+		// table has been correctly updated:
+		err = os.Remove("originalImage.jpeg")
+		if err != nil {
+			print("Error in deleting originalImage.jpeg file: ", err.Error())
+		}
+
+		// TODO: Send email with attachment
+
+		// TODO: Update the buyer cart state
+
+		// TODO: Insert data in the previous orders table
+
 	}
 	SendJSONResponse(w, http.StatusOK, map[string]string{"message": "Order placed and shipped successfully! Your order has been delivered to your registered email id!"})
 }
