@@ -289,7 +289,7 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 			print("Error in deleting originalImage.jpeg file: ", err.Error())
 		}
 
-		// TODO: Update the buyer cart state
+		// Updating the buyer cart state
 		var dataToBeDeletedFromCart models.Cart
 		rowsDeleted := DB.Where(&models.Cart{BuyerEmailId: buyerEmailId, ImageId: cartProduct.ImageId}).Delete(&dataToBeDeletedFromCart)
 		// As the delete query is not running correctly with limit 1, we are deleting the record from the database and then adding the records
@@ -303,7 +303,19 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		// TODO: Insert data in the previous orders table
+
+		// Inserting data in the previous orders table:
+		if DB.Create(&models.PreviousOrders{
+			BuyerEmailId: buyerEmailId,
+			SellerEmailId: imageData.SellerEmailId,
+			ImageId: imageData.ImageId,
+			Title: imageData.Title,
+			Price: imageData.Price,
+			BoughtAt: time.Time{},
+		}).Error != nil {
+			SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Previous Orders Schema")
+			return
+		}
 		
 		// TODO: remove the following break statement (for testing)
 		break
