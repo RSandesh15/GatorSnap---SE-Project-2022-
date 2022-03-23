@@ -11,6 +11,7 @@ import (
 	"os"
 	"se_uf/gator_snapstore/models"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -287,13 +288,25 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			print("Error in deleting originalImage.jpeg file: ", err.Error())
 		}
-		// TODO: remove the following break statement (for testing)
-		break
 
 		// TODO: Update the buyer cart state
-
+		var dataToBeDeletedFromCart models.Cart
+		rowsDeleted := DB.Where(&models.Cart{BuyerEmailId: buyerEmailId, ImageId: cartProduct.ImageId}).Delete(&dataToBeDeletedFromCart)
+		// As the delete query is not running correctly with limit 1, we are deleting the record from the database and then adding the records
+		// such that addedRecords = deleteRecords - 1
+		for i := 1; i < int(rowsDeleted.RowsAffected); i++ {
+			if DB.Create(&models.Cart{
+				BuyerEmailId: buyerEmailId,
+				ImageId:      cartProduct.ImageId,
+			}).Error != nil {
+				SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Cart Schema in deletion operation")
+				return
+			}
+		}
 		// TODO: Insert data in the previous orders table
-
+		
+		// TODO: remove the following break statement (for testing)
+		break
 	}
 	SendJSONResponse(w, http.StatusOK, map[string]string{"message": "Order placed and shipped successfully! Your order has been delivered to your registered email id!"})
 }
