@@ -139,6 +139,27 @@ func TestFetchCartInfoWhenExists(t *testing.T) {
 	}
 }
 
+func TestFetchCartInfoWhenDoesNotExists(t *testing.T) {
+	app := initApp()
+	req, _ := http.NewRequest("GET", "/fetchCartInfo", nil)
+	buyerEmailIdToBePassed := "abc@ufl.edu"
+	req = mux.SetURLVars(req, map[string]string{"buyerEmailId": buyerEmailIdToBePassed})
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.fetchCartInfo)
+	handler.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusOK, t)
+	checkContentType(r, t)
+	var dataMap map[string][]models.ProductCatalogue
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	if dataMap["data"] != nil {
+		t.Errorf("Fetch Cart Info (when user does not exist) does not exist for the given email Id: %v", buyerEmailIdToBePassed)
+	}
+}
+
 func TestDeleteFromCartWhenExists(t *testing.T) {
 	app := initApp()
 	var rqBody = toReader(`{"buyerEmailId":"jim@ufl.edu", "imageId":10}`)
