@@ -134,7 +134,7 @@ func DeleteImageFromCart(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	}
 	_, flag := checkIfImageExistsOrNot(DB, data.ImageId)
 	if !flag {
-		SendErrorResponse(w, http.StatusInternalServerError, "Resource not found")
+		SendErrorResponse(w, http.StatusNotFound, "Resource not found")
 		return
 	}
 	var dataToBeDeletedFromCart models.Cart
@@ -267,7 +267,7 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// TODO: Send email with attachment:
+		// Sending email with attachment (original unwatermarked image) to the buyer:
 		msg := gomail.NewMessage()
 		msg.SetHeader("From", os.Getenv("GATORSSUSERNAME"))
 		msg.SetHeader("To", buyerEmailId)
