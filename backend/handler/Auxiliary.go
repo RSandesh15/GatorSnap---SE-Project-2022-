@@ -306,17 +306,17 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 
 		// Inserting data in the previous orders table:
 		if DB.Create(&models.PreviousOrders{
-			BuyerEmailId: buyerEmailId,
+			BuyerEmailId:  buyerEmailId,
 			SellerEmailId: imageData.SellerEmailId,
-			ImageId: imageData.ImageId,
-			Title: imageData.Title,
-			Price: imageData.Price,
-			BoughtAt: time.Time{},
+			ImageId:       imageData.ImageId,
+			Title:         imageData.Title,
+			Price:         imageData.Price,
+			BoughtAt:      time.Time{},
 		}).Error != nil {
 			SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Previous Orders Schema")
 			return
 		}
-		
+
 		// TODO: remove the following break statement (for testing)
 		break
 	}
