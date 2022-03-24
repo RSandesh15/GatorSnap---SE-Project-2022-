@@ -143,6 +143,29 @@ func TestDeleteFromCartWhenExists(t *testing.T) {
 	}
 }
 
+func TestDeletFromCartWhenDoesNotExists(t *testing.T) {
+	app := initApp()
+	var rqBody = toReader(`{"buyerEmailId":"jim@ufl.edu", "imageId":-1}`)
+	req, _ := http.NewRequest("POST", "/deleteFromCart", rqBody)
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.deleteFromCart)
+	handler.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusNotFound, t)
+	checkContentType(r, t)
+	// print(r.Body.String())
+	var dataMap map[string]map[string]string
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	if dataMap["data"]["error"] == "Resource not found" || dataMap["data"]["error"] == "Error unmarshaling" {
+
+	} else {
+		t.Errorf("Delete from cart when resource does not exist failed")
+	}
+}
+
 func TestFetchProductInfoWhenExists(t *testing.T) {
 	app := initApp()
 	req, _ := http.NewRequest("GET", "/fetchProductInfo", nil)
