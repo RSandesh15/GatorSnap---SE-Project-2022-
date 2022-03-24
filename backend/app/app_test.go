@@ -106,7 +106,6 @@ func TestAddToCartWhenDoesNotExists(t *testing.T) {
 
 	checkStatusCode(r.Code, http.StatusNotFound, t)
 	checkContentType(r, t)
-	// print(r.Body.String())
 	var dataMap map[string]map[string]string
 	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
 	if err != nil {
@@ -116,6 +115,27 @@ func TestAddToCartWhenDoesNotExists(t *testing.T) {
 
 	} else {
 		t.Errorf("Add to cart when does not exist failed")
+	}
+}
+
+func TestFetchCartInfoWhenExists(t *testing.T) {
+	app := initApp()
+	req, _ := http.NewRequest("GET", "/fetchCartInfo", nil)
+	buyerEmailIdToBePassed := "jim@ufl.edu"
+	req = mux.SetURLVars(req, map[string]string{"buyerEmailId": buyerEmailIdToBePassed})
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.fetchCartInfo)
+	handler.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusOK, t)
+	checkContentType(r, t)
+	var dataMap map[string][]models.ProductCatalogue
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	if dataMap["data"][0].ImageId != 10 {
+		t.Errorf("Fetch Cart Info does not exist for the given email Id: %v", buyerEmailIdToBePassed)
 	}
 }
 
