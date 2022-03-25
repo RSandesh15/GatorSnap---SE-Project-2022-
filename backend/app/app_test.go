@@ -252,6 +252,26 @@ func TestFetchProductInfoWhenDoesNotExist(t *testing.T) {
 	}
 }
 
+func TestEmailProduct(t *testing.T) {
+	app := initApp()
+	var rqBody = toReader(`{"token" : "", "buyerEmailId" : "parmar.rishab@gmail.com", "paymentIntentId" : "pi_3KfBTkE2RN3PJKON023fFBbU"}`)
+	req, _ := http.NewRequest("POST", "/emailProduct", rqBody)
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.emailProduct)
+	handler.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusOK, t)
+	checkContentType(r, t)
+	var dataMap map[string]map[string]string
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	if dataMap["data"]["message"] != "Order placed and shipped successfully! Your order has been delivered to your registered email id!" {
+		t.Errorf("Email Product functionality failed")
+	}
+}
+
 func initApp() App {
 	db, _ := gorm.Open(sqlite.Open("gatorsnapstore.db"), &gorm.Config{})
 	db.AutoMigrate(&models.Image{})
