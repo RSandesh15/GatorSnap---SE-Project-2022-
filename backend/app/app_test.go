@@ -241,7 +241,6 @@ func TestFetchProductInfoWhenDoesNotExist(t *testing.T) {
 
 	checkStatusCode(r.Code, http.StatusNotFound, t)
 	checkContentType(r, t)
-	// print(r.Body.String())
 	var dataMap map[string]map[string]string
 	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
 	if err != nil {
@@ -269,6 +268,26 @@ func TestEmailProduct(t *testing.T) {
 	}
 	if dataMap["data"]["message"] != "Order placed and shipped successfully! Your order has been delivered to your registered email id!" {
 		t.Errorf("Email Product functionality failed")
+	}
+}
+
+func TestEmailProductWithIncorrectParameters(t *testing.T) {
+	app := initApp()
+	var rqBody = toReader(`{"token" : "", "buyerEmailId" : "sdfsdfdsfsfsdsdf", "paymentIntentId" : "sdfsdfsdsdfsdf"}`)
+	req, _ := http.NewRequest("POST", "/emailProduct", rqBody)
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.emailProduct)
+	handler.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusNotFound, t)
+	checkContentType(r, t)
+	var dataMap map[string]map[string]string
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	if dataMap["data"]["error"] != "Error in extracting data from payment intent" {
+		t.Errorf("Email product funtionality with incorrect parameters failed")
 	}
 }
 

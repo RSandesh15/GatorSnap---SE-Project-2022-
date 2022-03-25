@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -200,8 +199,7 @@ func CheckoutAndProcessPayment(DB *gorm.DB, w http.ResponseWriter, r *http.Reque
 	// println("pi.New: %v", pi.ClientSecret)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Printf("pi.New: %v", err)
+		SendErrorResponse(w, http.StatusInternalServerError, "Error in getting the payment intent")
 		return
 	}
 	// The output of this API call is that a client secret is returned to the front end with all the information needed
@@ -227,7 +225,6 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		SendErrorResponse(w, http.StatusNotFound, "Error unmarshaling")
 		return
 	}
-
 	// Fetching the payment data using paymentIntentId:
 	err = godotenv.Load(".env")
 	if err != nil {
@@ -237,7 +234,7 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	stripe.Key = os.Getenv("STRIPE_SECRET")
 	processedPaymentIntent, err := paymentintent.Get(data.PaymentIntentId, nil)
 	if err != nil {
-		SendErrorResponse(w, http.StatusInternalServerError, "Error in extracting data from payment intent")
+		SendErrorResponse(w, http.StatusNotFound, "Error in extracting data from payment intent")
 		return
 	}
 	paymentMetadata := processedPaymentIntent.Metadata
@@ -262,7 +259,6 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		fileName := cartProduct.Title + ".jpeg"
 		err = downloadOriginalImageFromCloud(imageData.ImageURL, fileName)
 		if err != nil {
-			println(err)
 			SendErrorResponse(w, http.StatusInternalServerError, "Error downloading image from cloud in email product API")
 			return
 		}
@@ -286,7 +282,8 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		// table has been correctly updated:
 		err = os.Remove(fileName)
 		if err != nil {
-			print("Error in deleting originalImage.jpeg file: ", err.Error())
+			SendErrorResponse(w, http.StatusInternalServerError, "Error in deleting originalImage.jpeg file")
+			return
 		}
 
 		// Updating the buyer cart state
@@ -316,7 +313,6 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 			SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Previous Orders Schema")
 			return
 		}
-
 		// TODO: remove the following break statement (for testing)
 		break
 	}
