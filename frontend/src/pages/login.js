@@ -26,15 +26,40 @@ this.handleSubmit = this.handleSubmit.bind(this);
 handleChange(event) {
 this.setState({ username: event.state.username, password: event.state.password });
 }
-handleSubmit(event) {
-event.preventDefault();
-if (this.state.username == 'admin@gatorsnaps.org' && this.state.password == 'secret') {
-this.props.history.push("/ShowcaseImages");
-}
- else {
-alert('Incorrect Credntials!');
-}
-}
+// handleSubmit(event) {
+// event.preventDefault();
+// if (this.state.username == 'admin@gatorsnaps.org' && this.state.password == 'secret') {
+// this.props.history.push("/ShowcaseImages");
+// }
+//  else {
+// alert('Incorrect Credntials!');
+// }
+// }
+handleSubmit = (e) => {
+    e.preventDefault();
+    fetch ("https://reqres.in/api/login", {
+       method: 'POST',
+       headers:{
+           'Accept' : 'application/json',
+           'Content-type' : 'application/json'
+       },
+       body: JSON.stringify({
+         email: this.state.username,
+         password: this.state.password
+      }),
+  })
+    .then((response) => response.json())
+    .then((result) => {
+      if(result.token === "QpwL5tke4Pnpja7X4"){
+        alert("You are logged in.");
+        console.log(result.token)
+       } else {
+           alert("Please check your login information.");
+           console.log(result)
+       }
+    });
+  }
+  
 
 render() {
 return (

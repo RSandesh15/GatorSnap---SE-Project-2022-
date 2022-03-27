@@ -10,6 +10,7 @@ import UserLandingPage from './pages/userLandingPage';
 
 
 
+
  
 function App() {
   console.log("Temp")
@@ -22,6 +23,7 @@ function App() {
       <Route exact path = "/SellerLogin" component={SellerLogin} />
       <Route exact path = "/SellerUploadPage" component={SellerUploadPage} />
       <Route exact path = "/userLandingPage" component={UserLandingPage} />
+      
       
     </Switch> 
     </div>
