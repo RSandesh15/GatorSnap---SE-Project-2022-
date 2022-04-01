@@ -26,15 +26,7 @@ this.handleSubmit = this.handleSubmit.bind(this);
 handleChange(event) {
 this.setState({ username: event.state.username, password: event.state.password });
 }
-// handleSubmit(event) {
-// event.preventDefault();
-// if (this.state.username == 'admin@gatorsnaps.org' && this.state.password == 'secret') {
-// this.props.history.push("/ShowcaseImages");
-// }
-//  else {
-// alert('Incorrect Credntials!');
-// }
-// }
+
 handleSubmit = (e) => {
     e.preventDefault();
     fetch ("https://reqres.in/api/login", {

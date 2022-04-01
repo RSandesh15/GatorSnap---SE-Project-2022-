@@ -34,6 +34,58 @@ function srcset(image, width, height, rows = 1, cols = 1) {
 
 export default function UserLandingPage() {
 
+    // constructor(props) {
+    //     super(props);
+    //     this.state = { email: "jim@ufl.edu", id:"", authflag:1 };
+    //     this.handleAddition = this.handleAddition.bind(this);
+    //     this.handleChange = this.handleChange.bind(this);
+    //     }
+    // const email: "jim@ufl.edu"
+
+    const handleAddition = (e,imageID) => {
+        console.log("hi")
+        e.preventDefault();
+        fetch("http://localhost:8085/addToCart", {
+            mode: 'no-cors',
+           method: 'POST',
+           headers:{
+               'Accept' : 'application/json',
+               'Content-type' : 'application/json'
+           },
+           body: JSON.stringify({
+             buyerEmailId: 'aakansh.togani@ufl.edu',
+             imageId : imageID
+             
+          }),
+      })
+
+      setItemCount(Math.max(itemCount + 1));
+      
+    }
+    const handleDeletion = (e) => {
+        console.log("hi")
+        e.preventDefault();
+        fetch("http://localhost:8085/deleteFromCart", {
+            mode: 'no-cors',
+           method: 'POST',
+           headers:{
+               'Accept' : 'application/json',
+               'Content-type' : 'application/json'
+           },
+           body: JSON.stringify({
+             buyerEmailId: 'aakansh.togani@ufl.edu',
+             imageId : 5
+             
+          }),
+      })
+
+      setItemCount(Math.max(itemCount - 1,0));
+      
+    }
+    //   handleChange(event) {
+    //     this.setState({ email: event.state.email, id: event.state.id });
+    //     }
+
 const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -45,11 +97,12 @@ const [open, setOpen] = React.useState(false);
     axios.get("http://localhost:8085/fetchImages").then((response) => {
       debugger;
       setFetchedImageData(response.data.data);
-      console.log(fetchImages);
+      
     });
   }, []);
 
   const [itemCount, setItemCount] = React.useState(1);
+  const [imageID, setImageID] = React.useState()
 
   return (
     <div className="app">
@@ -152,6 +205,7 @@ const [open, setOpen] = React.useState(false);
         const cols =  8;
         const rows =  2;
 
+
         return (        <Box>
                         <ImageListItem key={item.wImageUrl} cols={cols} rows={rows}>
                           <img
@@ -180,23 +234,20 @@ const [open, setOpen] = React.useState(false);
                         </ImageListItem>
                         <ButtonGroup>
                         <Button
-                        onClick={() => {
-                         setItemCount(Math.max(itemCount - 1, 0));
-                             }}
+                        onClick={handleDeletion}
                         >
                             {" "}
                         <RemoveIcon fontSize="small" />
                         </Button>
-                        <Button
-                            onClick={() => {
-                            setItemCount(itemCount + 1);
-                            }}
-                         >
+                        <Button onClick={(e)=>handleAddition(e,item.imageId)} >
                              {" "}
                             <AddIcon fontSize="small" />        
                          </Button>
                          <Button onClick={handleOpen}>Details</Button>
-                         {open && <BasicModal/>}
+                        
+                         
+                         {open && <BasicModal imageId={item.imageId}/>}
+                         
 
                            </ButtonGroup>
                             </Box>      

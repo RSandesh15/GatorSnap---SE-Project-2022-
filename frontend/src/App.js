@@ -7,6 +7,7 @@ import ShowcaseImages from './Components/ShowcaseImages';
 import SellerLogin from './pages/SellerLogin';
 import SellerUploadPage from './pages/SellerUploadPage';
 import UserLandingPage from './pages/userLandingPage';
+import Checkout from './pages/Checkout';
 
 
 
@@ -23,7 +24,7 @@ function App() {
       <Route exact path = "/SellerLogin" component={SellerLogin} />
       <Route exact path = "/SellerUploadPage" component={SellerUploadPage} />
       <Route exact path = "/userLandingPage" component={UserLandingPage} />
-      
+      <Route exact path = "/Checkout" component={Checkout} />
       
     </Switch> 
     </div>
