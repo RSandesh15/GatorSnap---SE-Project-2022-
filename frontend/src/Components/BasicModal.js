@@ -29,14 +29,15 @@ function srcset(image, width, height, rows = 1, cols = 1) {
 }
 
 
-export default function BasicModal() {
+export default function BasicModal(props) {
+  
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () =>  {console.log("here") 
   setOpen(false);}
   const [fetchImages, setFetchedImageData] = useState([]);
   useEffect(() => {
-    axios.get("http://localhost:8085/fetchProductInfo/1").then((response) => {
+    axios.get(`http://localhost:8085/fetchProductInfo/${props.imageId}`).then((response) => {
       
       setFetchedImageData(response.data.data);
       // console.log(fetchImages);
