@@ -43,7 +43,7 @@ handleSubmit = (e) => {
     .then((response) => response.json())
     .then((result) => {
       if(result.token === "QpwL5tke4Pnpja7X4"){
-        alert("You are logged in.");
+        
         this.props.history.push("/userLandingPage");
         console.log(result.token)
        } else {
