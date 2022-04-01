@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+
 import{
 Button,
 TextField,
@@ -10,17 +9,11 @@ Typography,
 Toolbar,
 
 } from "@material-ui/core";
+import { render } from "@testing-library/react";
 import Checkout2 from "../Components/Checkout2";
 
 export default function Checkout() {
-    const [fetchCart, setFetchedCartData] = useState([]);
-  useEffect(() => {
-    axios.get(`http://localhost:8085/fetchCartInfo/aakansh.togani@ufl.edu`).then((response) => {
-      
-      setFetchedCartData(response.data.data);
-       console.log(response.data.data);
-    });
-  }, []);
+       render()
         return (
           
         <div>
