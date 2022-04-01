@@ -50,14 +50,14 @@ export default function UserLandingPage() {
         "Content-type": "application/json",
       },
       body: JSON.stringify({
-        buyerEmailId: "johnsmith@ufl.edu",
+        buyerEmailId: "aakanshtogani@ufl.edu",
         imageId: imageID,
       }),
     });
 
     setItemCount(Math.max(itemCount + 1));
   };
-  const handleDeletion = (e) => {
+  const handleDeletion = (e, imageID) => {
     console.log("hi");
     e.preventDefault();
     fetch("http://localhost:8085/deleteFromCart", {
@@ -68,7 +68,7 @@ export default function UserLandingPage() {
         "Content-type": "application/json",
       },
       body: JSON.stringify({
-        buyerEmailId: "johnsmith@ufl.edu",
+        buyerEmailId: "aakanshtogani@ufl.edu",
         imageId: imageID,
       }),
     });
