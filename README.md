@@ -15,7 +15,7 @@ The tech stack currently in use for developing this web application are:
 3. SQLite
 
 Team Members:
-1. Rishab Parmar
-2. Pulin Soni
-3. Aakansh Togani
-4. Sandesh Ramesh
+1. Rishab Parmar (Backend)
+2. Pulin Soni (Backend)
+3. Aakansh Togani (Frontend)
+4. Sandesh Ramesh (Frontend)

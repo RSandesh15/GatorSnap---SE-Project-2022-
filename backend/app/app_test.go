@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"se_uf/gator_snapstore/handler"
 	"se_uf/gator_snapstore/models"
 	"strconv"
 	"testing"
@@ -43,6 +44,34 @@ func TestGetAllImagesAndCompareStruct(t *testing.T) {
 	checkBody(r.Body, image, t)
 }
 
+func TestFetchGenreCateogires(t *testing.T) {
+
+	app := initApp()
+	app.setupGenreCategories()
+	req, _ := http.NewRequest("GET", "/fetchGenreCategories", nil)
+	r := httptest.NewRecorder()
+	handler_ := http.HandlerFunc(app.getGenreCategories)
+	handler_.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusOK, t)
+	checkContentType(r, t)
+
+	// print(r.Body.String())
+
+	var dataMap map[string][]string
+
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	for index, genre := range handler.GenreCategorySlice {
+		if genre != dataMap["data"][index] {
+			t.Errorf("Error in fetching genre categories test")
+		}
+	}
+}
+
 func TestAddToCartWhenExists(t *testing.T) {
 	app := initApp()
 	var rqBody = toReader(`{"buyerEmailId":"jim@ufl.edu", "imageId":10}`)
@@ -77,6 +106,94 @@ func TestAddToCartWhenDoesNotExists(t *testing.T) {
 
 	checkStatusCode(r.Code, http.StatusNotFound, t)
 	checkContentType(r, t)
+	var dataMap map[string]map[string]string
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	if dataMap["data"]["error"] == "Resource not found" || dataMap["data"]["error"] == "Error unmarshaling" {
+
+	} else {
+		t.Errorf("Add to cart when does not exist failed")
+	}
+}
+
+func TestFetchCartInfoWhenExists(t *testing.T) {
+	app := initApp()
+	req, _ := http.NewRequest("GET", "/fetchCartInfo", nil)
+	buyerEmailIdToBePassed := "jim@ufl.edu"
+	req = mux.SetURLVars(req, map[string]string{"buyerEmailId": buyerEmailIdToBePassed})
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.fetchCartInfo)
+	handler.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusOK, t)
+	checkContentType(r, t)
+	var dataMap map[string][]models.ProductCatalogue
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	if dataMap["data"][0].ImageId != 10 {
+		t.Errorf("Fetch Cart Info does not exist for the given email Id: %v", buyerEmailIdToBePassed)
+	}
+}
+
+func TestFetchCartInfoWhenDoesNotExists(t *testing.T) {
+	app := initApp()
+	req, _ := http.NewRequest("GET", "/fetchCartInfo", nil)
+	buyerEmailIdToBePassed := "abc@ufl.edu"
+	req = mux.SetURLVars(req, map[string]string{"buyerEmailId": buyerEmailIdToBePassed})
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.fetchCartInfo)
+	handler.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusOK, t)
+	checkContentType(r, t)
+	var dataMap map[string][]models.ProductCatalogue
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	if dataMap["data"] != nil {
+		t.Errorf("Fetch Cart Info (when user does not exist) does not exist for the given email Id: %v", buyerEmailIdToBePassed)
+	}
+}
+
+func TestDeleteFromCartWhenExists(t *testing.T) {
+	app := initApp()
+	var rqBody = toReader(`{"buyerEmailId":"jim@ufl.edu", "imageId":10}`)
+	req, _ := http.NewRequest("POST", "/deleteFromcart", rqBody)
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.deleteFromCart)
+	handler.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusOK, t)
+	checkContentType(r, t)
+	// print(r.Body.String())
+	// type IncomingData struct {
+	//     Message string `json:"message"`
+	// }
+	var dataMap map[string]map[string]string
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	if dataMap["data"]["message"] != "Removed from cart" {
+		t.Errorf("Delete from cart failed when exists")
+	}
+}
+
+func TestDeletFromCartWhenDoesNotExists(t *testing.T) {
+	app := initApp()
+	var rqBody = toReader(`{"buyerEmailId":"jim@ufl.edu", "imageId":-1}`)
+	req, _ := http.NewRequest("POST", "/deleteFromCart", rqBody)
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.deleteFromCart)
+	handler.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusNotFound, t)
+	checkContentType(r, t)
 	// print(r.Body.String())
 	var dataMap map[string]map[string]string
 	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
@@ -84,9 +201,9 @@ func TestAddToCartWhenDoesNotExists(t *testing.T) {
 		fmt.Println("Error in Unmarshalling: ", err.Error())
 	}
 	if dataMap["data"]["error"] == "Resource not found" || dataMap["data"]["error"] == "Error unmarshaling" {
-		
+
 	} else {
-		t.Errorf("Add to cart when does not exist failed")
+		t.Errorf("Delete from cart when resource does not exist failed")
 	}
 }
 
@@ -124,7 +241,6 @@ func TestFetchProductInfoWhenDoesNotExist(t *testing.T) {
 
 	checkStatusCode(r.Code, http.StatusNotFound, t)
 	checkContentType(r, t)
-	// print(r.Body.String())
 	var dataMap map[string]map[string]string
 	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
 	if err != nil {
@@ -135,11 +251,52 @@ func TestFetchProductInfoWhenDoesNotExist(t *testing.T) {
 	}
 }
 
+func TestEmailProduct(t *testing.T) {
+	app := initApp()
+	var rqBody = toReader(`{"token" : "", "buyerEmailId" : "parmar.rishab@gmail.com", "paymentIntentId" : "pi_3KfBTkE2RN3PJKON023fFBbU"}`)
+	req, _ := http.NewRequest("POST", "/emailProduct", rqBody)
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.emailProduct)
+	handler.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusOK, t)
+	checkContentType(r, t)
+	var dataMap map[string]map[string]string
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	if dataMap["data"]["message"] != "Order placed and shipped successfully! Your order has been delivered to your registered email id!" {
+		t.Errorf("Email Product functionality failed")
+	}
+}
+
+func TestEmailProductWithIncorrectParameters(t *testing.T) {
+	app := initApp()
+	var rqBody = toReader(`{"token" : "", "buyerEmailId" : "sdfsdfdsfsfsdsdf", "paymentIntentId" : "sdfsdfsdsdfsdf"}`)
+	req, _ := http.NewRequest("POST", "/emailProduct", rqBody)
+	r := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.emailProduct)
+	handler.ServeHTTP(r, req)
+
+	checkStatusCode(r.Code, http.StatusNotFound, t)
+	checkContentType(r, t)
+	var dataMap map[string]map[string]string
+	err := json.Unmarshal(r.Body.Bytes(), &dataMap)
+	if err != nil {
+		fmt.Println("Error in Unmarshalling: ", err.Error())
+	}
+	if dataMap["data"]["error"] != "Error in extracting data from payment intent" {
+		t.Errorf("Email product funtionality with incorrect parameters failed")
+	}
+}
+
 func initApp() App {
 	db, _ := gorm.Open(sqlite.Open("gatorsnapstore.db"), &gorm.Config{})
 	db.AutoMigrate(&models.Image{})
 	db.AutoMigrate(&models.Genre{})
 	db.AutoMigrate(&models.Cart{})
+	db.AutoMigrate(&models.GenreCategories{})
 	return App{DB: db}
 }
 

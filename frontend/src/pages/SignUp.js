@@ -137,7 +137,7 @@ export default function SignUp() {
             </Grid>
           </Box>
         </Box>
-        <Copyright sx={{ mt: 5 }} />
+        <p> CopyRight © GatorSnaps!</p>
       </Container>
     </ThemeProvider>
   );
