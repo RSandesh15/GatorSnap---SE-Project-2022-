@@ -308,7 +308,7 @@ func EmailProduct(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 			ImageId:       imageData.ImageId,
 			Title:         imageData.Title,
 			Price:         imageData.Price,
-			BoughtAt:      time.Time{},
+			BoughtAt:      time.Now(),
 		}).Error != nil {
 			SendErrorResponse(w, http.StatusInternalServerError, "Error inserting in Previous Orders Schema")
 			return
@@ -342,4 +342,33 @@ func downloadOriginalImageFromCloud(URL, fileName string) error {
 		return err
 	}
 	return nil
+}
+
+func FetchSellerTransactions(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	sellerEmailId := params["sellerEmailId"]
+	// TODO: First check the cookie here and validate the name that has been sent along in the request
+	var sellersTransactions []models.PreviousOrders
+	var allSellersTransactions []models.PreviousOrders
+	allSTFromDB := DB.Where(&models.PreviousOrders{SellerEmailId: sellerEmailId}).Find(&allSellersTransactions)
+	rows, err := allSTFromDB.Rows()
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer rows.Close()
+	var previousTransaction models.PreviousOrders
+	for rows.Next() {
+		DB.ScanRows(rows, &previousTransaction)
+		previousTransactionOutput := models.PreviousOrders{
+			SellerEmailId: previousTransaction.SellerEmailId,
+			BuyerEmailId:  previousTransaction.BuyerEmailId,
+			Title:         previousTransaction.Title,
+			Price:         previousTransaction.Price,
+			ImageId:       previousTransaction.ImageId,
+			BoughtAt:      previousTransaction.BoughtAt,
+		}
+		sellersTransactions = append(sellersTransactions, previousTransactionOutput)
+	}
+	SendJSONResponse(w, http.StatusOK, sellersTransactions)
 }
