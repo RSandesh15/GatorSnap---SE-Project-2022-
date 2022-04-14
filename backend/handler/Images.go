@@ -95,7 +95,7 @@ func GetGenreCategories(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 func processWaterMarking(todoImage image.Image) (image.Image, error) {
-	image2, err := os.Open("watermark.png")
+	image2, err := os.Open("watermark.JPG")
 	if err != nil {
 		log.Fatalf("failed to open: %s", err)
 		return nil, err
