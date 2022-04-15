@@ -42,3 +42,6 @@ Here is a walkthrough of what was achieved on the backend and database side for 
 
 Here is a walkthrough of what was achieved on the frontend side for sprint 3. 
 <img src='Gifs/FrontEnd_Sprint3.gif' title='Frontend' width='' />
+
+### Cypress Testing
+Conducted cypress tests on additional functionalities for multiple pages. This testing included - 1. Page redirection 2. Field authentication 3. Button responses 4. Field validation
