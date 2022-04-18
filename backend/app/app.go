@@ -135,5 +135,5 @@ func (a *App) emailProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) fetchSellerTransactions(w http.ResponseWriter, r *http.Request) {
-    handler.FetchSellerTransactions(a.DB, w, r)
+	handler.FetchSellerTransactions(a.DB, w, r)
 }
