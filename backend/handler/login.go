@@ -2,14 +2,16 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
 
+	"crypto/rand"
+
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-	"gorm.io/gorm"
 )
 
 type googleAuthResponse struct {
@@ -17,13 +19,19 @@ type googleAuthResponse struct {
 	Email         string `json:"email"`
 	VerifiedEmail bool   `json:"verified_email"`
 	Name          string `json:"name"`
+	GivenName     string `json:"given_name"`
+	FamilyName    string `json:"family_name"`
+	Picture       string `json:"picture"`
+	Locale        string `json:"locale"`
 }
 
 type userClaims struct {
 	Email string `json:"email"`
+	Name  string `json:"name"`
 	jwt.StandardClaims
 }
 
+/*
 func Register(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	var data map[string]string //we nedd to declare a new User struct
 
@@ -32,15 +40,78 @@ func Register(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-}
+}*/
 
 func oAuthGoogleConfig() *oauth2.Config {
 	return &oauth2.Config{
 		RedirectURL:  "http://localhost:" + os.Getenv("PORT") + "/google/callback",
-		ClientID:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
-		ClientSecret: os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
+		ClientID:     "305686927939-hsc849g4qd7jtuqbepl2dlf58or3p42l.apps.googleusercontent.com",
+		ClientSecret: "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",
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"},
 		Endpoint:     google.Endpoint,
+	}
+}
+
+func GenerateRandomString() (string, error) {
+	n := 5
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	s := fmt.Sprintf("%X", b)
+	return s, nil
+}
+
+func GoogleLogin(w http.ResponseWriter, r *http.Request) {
+
+	tempState, err := GenerateRandomString()
+	state := tempState
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, "Error in randomizing string")
+		return
+	}
+	url := oAuthGoogleConfig().AuthCodeURL(state)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+func handleCallback(w http.ResponseWriter, r *http.Request) {
+
+	tempState, err := GenerateRandomString()
+	state := tempState
+	if r.FormValue("State") != state {
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	token, err := oAuthGoogleConfig().Exchange(oauth2.NoContext, r.FormValue("code"))
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, "Error in Token callback")
+		return
+	}
+
+	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, "Could not create request")
+		return
+	}
+	defer resp.Body.Close()
+	googleResponse := googleAuthResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&googleResponse)
+	if err != nil {
+		SendErrorResponse(w, http.StatusInternalServerError, "Could not parse response")
+		return
+	}
+
+	tkn, _ := GenerateToken(&googleResponse)
+	cookie, err := r.Cookie("insomnia")
+	if err != nil {
+		cookie = &http.Cookie{
+			Name:     "insomnia",
+			Value:    tkn,
+			Expires:  time.Now().Add(time.Hour * 24),
+			HttpOnly: true,
+		}
+		http.SetCookie(w, cookie)
 	}
 }
 
@@ -63,7 +134,7 @@ func GenerateToken(googleResponse *googleAuthResponse) (string, error) {
 func ValidateToken(signedToken string) (claims *userClaims, err error) {
 
 	token, err := jwt.ParseWithClaims(signedToken, &userClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("JWT_SECRET")), nil
+		return []byte(os.Getenv("JWT_SECRET")), nil ///jwt_secret???????
 	})
 
 	if err != nil {
