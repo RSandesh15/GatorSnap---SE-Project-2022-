@@ -45,3 +45,18 @@ Here is a walkthrough of what was achieved on the frontend side for sprint 3.
 
 ### Cypress Testing
 Conducted cypress tests on additional functionalities for multiple pages. This testing included - 1. Page redirection 2. Field authentication 3. Button responses 4. Field validation
+Create a new React project to get started. Optionally add TypeScript
+1. npm create react-app cypress-test-react --template typescript
+You also need @cypress/react, which is the primary way to mount and interact with components. 
+1. npm add cypress @cypress/react @cypress/webpack-dev-server --dev
+
+### Uniting with Jest
+If you are new to React, we recommend using Create React App. It is ready to use and ships with Jest. You will only need to add react-test-renderer for rendering snapshots. If you have an existing application you'll need to install a few packages to make everything work well together. We are using the babel-jest package and the react babel preset to transform our code inside of the test environment. Use the following for setup:
+1. yarn add --dev react-test-renderer
+2. yarn add --dev jest babel-jest @babel/preset-env @babel/preset-react react-test-renderer
+
+'it' or 'test' You would pass a function to this method, and the test runner would execute that function as a block of tests. The first rule is that any files found in any directory with the name __test__ are considered a test. If you put a JavaScript file in one of these folders, Jest will try to run it when you call Jest, for better or for worse.
+
+To run the test cases, we need to use the command:
+1. npm run test OR
+2. npm test
