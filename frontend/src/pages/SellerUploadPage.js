@@ -4,7 +4,28 @@ import '../App.css';
 import { Button, Form, FormGroup, Label, Input }
   from 'reactstrap';
   
+  /*const sendImageDetails = (e, imageID, priceNum, titleDis, descpt, genreType) => {
+    console.log("hi");
+    e.preventDefault();
+    fetch("http://localhost:8085/", {
+      mode: "no-cors",
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        sellerEmailId: "aakanshtogani@ufl.edu",
+        title: titleDis,
+        description: descpt,
+        price: priceNum,
+        genres: genreType,
+        imageId: imageID,
+      }),
+    });
 
+    setItemCount(Math.max(itemCount + 1));
+  };*/
 
 
 function SellerUploadPage() {
@@ -38,3 +59,6 @@ function SellerUploadPage() {
 }
 
 export default SellerUploadPage;
+
+//<Input type="submit" placeholder='Submit'/><br></br><br></br>
+//<Button onClick={sendImageDetails}>Submit </Button><br></br><br></br>
