@@ -50,7 +50,7 @@ export default function UserLandingPage() {
         "Content-type": "application/json",
       },
       body: JSON.stringify({
-        buyerEmailId: "aakanshtogani@ufl.edu",
+        buyerEmailId: "aakansh.togani@ufl.edu",
         imageId: imageID,
       }),
     });
@@ -68,7 +68,7 @@ export default function UserLandingPage() {
         "Content-type": "application/json",
       },
       body: JSON.stringify({
-        buyerEmailId: "aakanshtogani@ufl.edu",
+        buyerEmailId: "aakansh.togani@ufl.edu",
         imageId: imageID,
       }),
     });
@@ -270,8 +270,8 @@ export default function UserLandingPage() {
       >
         <ImageList
           sx={{
-            width: 500,
-            height: 450,
+            width: 1000,
+            height: 700,
             // Promote the list into its own layer in Chrome. This costs memory, but helps keeping high FPS.
             transform: "translateZ(0)",
           }}
@@ -286,7 +286,9 @@ export default function UserLandingPage() {
               <Box>
                 <ImageListItem key={item.wImageUrl} cols={cols} rows={rows}>
                   <img
-                    {...srcset(item.wImageUrl, 125, 100, rows, cols)}
+                    //{...srcset(item.wImageUrl, 125, 100, rows, cols)}
+                    src = {item.wImageUrl}
+                    width = "500" height = "500"
                     alt={item.title}
                     loading="lazy"
                   />
