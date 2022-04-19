@@ -111,6 +111,7 @@ func HandleCallback(w http.ResponseWriter, r *http.Request) {
 	//err=json.Unmarshal(googleResponse, )
 
 	tkn, _ := GenerateToken(&googleResponse)
+	fmt.Println(tkn)
 	cookie, err := r.Cookie("insomnia")
 	if err != nil {
 		cookie = &http.Cookie{
@@ -121,7 +122,8 @@ func HandleCallback(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: true,
 		}
 		http.SetCookie(w, cookie)
-		http.Redirect(w, r, "http://localhost:8085/userLandingPage", http.StatusTemporaryRedirect)
+		fmt.Println(cookie.Name)
+		http.Redirect(w, r, "http://localhost:3000/userLandingPage", http.StatusTemporaryRedirect)
 	}
 }
 
@@ -163,6 +165,22 @@ func ValidateToken(signedToken string) (claims *userClaims, err error) {
 
 	return claims, err
 
+}
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("insomnia")
+	if err != nil {
+		cookie = &http.Cookie{
+			Name:  "insomnia",
+			Value: "",
+
+			Expires:  time.Now().Add(-time.Hour),
+			HttpOnly: true,
+		}
+		http.SetCookie(w, cookie)
+		fmt.Println(cookie.Name)
+		http.Redirect(w, r, "http://localhost:3000/login", http.StatusTemporaryRedirect)
+	}
 }
 
 /*
