@@ -90,7 +90,6 @@ func (a *App) setRouters() {
 	a.Router.HandleFunc("/emailProduct", a.emailProduct).Methods("POST")
 	a.Router.HandleFunc("/fetchSellerTransactions/{sellerEmailId}", a.fetchSellerTransactions).Methods("GET")
 	a.Router.HandleFunc("/google/login", a.googleLogin).Methods("GET")
-	a.Router.HandleFunc("/google/callback", a.handleCallback).Methods("GET")
 	//one to handle callback
 }
 
@@ -143,8 +142,4 @@ func (a *App) fetchSellerTransactions(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) googleLogin(w http.ResponseWriter, r *http.Request) {
 	handler.GoogleLogin(w, r)
-}
-
-func (a *App) handleCallback(w http.ResponseWriter, r *http.Request) {
-	handler.HandleCallback(w, r)
 }
