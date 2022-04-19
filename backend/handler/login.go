@@ -1,10 +1,10 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"crypto/rand"
@@ -12,6 +12,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+	//"gorm.io/gorm"
 )
 
 type googleAuthResponse struct {
@@ -24,6 +25,10 @@ type googleAuthResponse struct {
 	Picture       string `json:"picture"`
 	Locale        string `json:"locale"`
 }
+
+var (
+	state = "holderState"
+)
 
 type userClaims struct {
 	Email string `json:"email"`
@@ -41,11 +46,13 @@ func Register(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }*/
-
+//+ os.Getenv("PORT")
 func oAuthGoogleConfig() *oauth2.Config {
 	return &oauth2.Config{
-		RedirectURL:  "http://localhost:" + os.Getenv("PORT") + "/google/callback",
-		ClientID:     "305686927939-hsc849g4qd7jtuqbepl2dlf58or3p42l.apps.googleusercontent.com",
+		RedirectURL: "http://localhost:8085/google/callback",
+		ClientID:    "305686927939-hsc849g4qd7jtuqbepl2dlf58or3p42l.apps.googleusercontent.com",
+		//ClientID:  os.Getenv("GOOGLECLIENTID"),
+		//ClientSecret: os.Getenv("GOOGLECLIENSECRET"),
 		ClientSecret: "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",
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"},
 		Endpoint:     google.Endpoint,
@@ -64,26 +71,22 @@ func GenerateRandomString() (string, error) {
 
 func GoogleLogin(w http.ResponseWriter, r *http.Request) {
 
-	tempState, err := GenerateRandomString()
-	state := tempState
-	if err != nil {
-		SendErrorResponse(w, http.StatusInternalServerError, "Error in randomizing string")
-		return
-	}
+	//tempState, err := GenerateRandomString()
+	//state := tempState
+	//if err != nil {
+	//	SendErrorResponse(w, http.StatusInternalServerError, "Error in randomizing string")
+	//	return
+	//}
 	url := oAuthGoogleConfig().AuthCodeURL(state)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
-func handleCallback(w http.ResponseWriter, r *http.Request) {
-
-	tempState, err := GenerateRandomString()
-	state := tempState
-	if r.FormValue("State") != state {
+func HandleCallback(w http.ResponseWriter, r *http.Request) {
+	if r.FormValue("state") != state {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-
-	token, err := oAuthGoogleConfig().Exchange(oauth2.NoContext, r.FormValue("code"))
+	token, err := oAuthGoogleConfig().Exchange(context.Background(), r.FormValue("code"))
 	if err != nil {
 		SendErrorResponse(w, http.StatusInternalServerError, "Error in Token callback")
 		return
@@ -95,23 +98,30 @@ func handleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer resp.Body.Close()
+	//googleResponse, err:= ioutil.ReadAll(resp.Body)
+
 	googleResponse := googleAuthResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&googleResponse)
 	if err != nil {
 		SendErrorResponse(w, http.StatusInternalServerError, "Could not parse response")
 		return
 	}
+	fmt.Println(googleResponse.Email)
+	//fmt.Fprint(w, "Response: %s", googleResponse)
+	//err=json.Unmarshal(googleResponse, )
 
 	tkn, _ := GenerateToken(&googleResponse)
 	cookie, err := r.Cookie("insomnia")
 	if err != nil {
 		cookie = &http.Cookie{
-			Name:     "insomnia",
-			Value:    tkn,
+			Name:  "insomnia",
+			Value: tkn,
+
 			Expires:  time.Now().Add(time.Hour * 24),
 			HttpOnly: true,
 		}
 		http.SetCookie(w, cookie)
+		http.Redirect(w, r, "http://localhost:8085/userLandingPage", http.StatusTemporaryRedirect)
 	}
 }
 
@@ -119,6 +129,7 @@ func GenerateToken(googleResponse *googleAuthResponse) (string, error) {
 
 	claims := userClaims{
 		Email: googleResponse.Email,
+		Name:  googleResponse.Name,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
 			Issuer:    googleResponse.ID,
@@ -126,7 +137,7 @@ func GenerateToken(googleResponse *googleAuthResponse) (string, error) {
 	}
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err := t.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	tokenString, err := t.SignedString([]byte("JWT_SECRET"))
 
 	return tokenString, err
 }
@@ -134,7 +145,7 @@ func GenerateToken(googleResponse *googleAuthResponse) (string, error) {
 func ValidateToken(signedToken string) (claims *userClaims, err error) {
 
 	token, err := jwt.ParseWithClaims(signedToken, &userClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("JWT_SECRET")), nil ///jwt_secret???????
+		return []byte("JWT_SECRET"), nil ///jwt_secret???????
 	})
 
 	if err != nil {
