@@ -50,7 +50,7 @@ export default function UserLandingPage() {
         "Content-type": "application/json",
       },
       body: JSON.stringify({
-        buyerEmailId: "aakansh.togani@ufl.edu",
+        buyerEmailId: "mehuljhaver@ufl.edu",
         imageId: imageID,
       }),
     });
@@ -66,9 +66,10 @@ export default function UserLandingPage() {
       headers: {
         Accept: "application/json",
         "Content-type": "application/json",
+        "Access-Control-Allow-Origin" : "*"
       },
       body: JSON.stringify({
-        buyerEmailId: "aakansh.togani@ufl.edu",
+        buyerEmailId: "mehuljhaver@ufl.edu",
         imageId: imageID,
       }),
     });
@@ -87,8 +88,9 @@ export default function UserLandingPage() {
   const obj = Object.entries(fetchImages);
 
   useEffect(() => {
+
     axios.get("http://localhost:8085/fetchImages").then((response) => {
-      debugger;
+      
       setFetchedImageData(response.data.data);
     });
   }, []);

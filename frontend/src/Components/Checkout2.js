@@ -102,8 +102,8 @@ export default function Checkout2() {
       body: JSON.stringify({
 
           token: "",
-          buyerEmailId: "aakansh.togani@ufl.edu",
-          paymentIntentId: "pi_3Kq6KQE2RN3PJKON1duA9ajo"
+          buyerEmailId: "mehuljhaver@ufl.edu",
+          paymentIntentId: "pi_3KqQeXE2RN3PJKON1PgoiGRH"
       }),
     }).then(function (response) {
             console.log(response.data);

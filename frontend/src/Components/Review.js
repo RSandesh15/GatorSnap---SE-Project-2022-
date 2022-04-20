@@ -45,7 +45,7 @@ export default function Review() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:8085/fetchCartInfo/aakansh.togani@ufl.edu`)
+      .get(`http://localhost:8085/fetchCartInfo/mehuljhaver@ufl.edu`)
       .then((response) => {
         setFetchedCartData(response.data.data);
         console.log(response.data.data);
