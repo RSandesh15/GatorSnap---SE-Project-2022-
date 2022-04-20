@@ -70,7 +70,7 @@ func GenerateRandomString() (string, error) {
 }
 
 func GoogleLogin(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("In Login")
+
 	//tempState, err := GenerateRandomString()
 	//state := tempState
 	//if err != nil {
@@ -112,25 +112,24 @@ func HandleCallback(w http.ResponseWriter, r *http.Request) {
 
 	tkn, _ := GenerateToken(&googleResponse)
 	fmt.Println(tkn)
-	// cookie, err := r.Cookie("insomnia")
+	//cookie, err := r.Cookie("insomnia")
 	cookie := http.Cookie{
-			Name:  "insomnia",
-			Value: tkn,
-			Expires:  time.Now().Add(time.Hour),
-			HttpOnly: false,
-			Path: "/",
+		Name:     "insomnia",
+		Value:    tkn,
+		Expires:  time.Now().Add(time.Hour * 24),
+		HttpOnly: false,
+		Path:     "/",
 	}
 	http.SetCookie(w, &cookie)
 	fmt.Println(cookie.Name)
 	http.Redirect(w, r, "http://localhost:3000/userLandingPage", http.StatusTemporaryRedirect)
-	
 }
 
 func GenerateToken(googleResponse *googleAuthResponse) (string, error) {
 
 	claims := userClaims{
 		Email: googleResponse.Email,
-		Name:  googleResponse.Name,
+		//Name:  googleResponse.Name,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
 			Issuer:    googleResponse.ID,
@@ -163,23 +162,19 @@ func ValidateToken(signedToken string) (claims *userClaims, err error) {
 	}
 
 	return claims, err
-
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("insomnia")
-	if err != nil {
-		cookie = &http.Cookie{
-			Name:  "insomnia",
-			Value: "",
-
-			Expires:  time.Now().Add(-time.Hour),
-			HttpOnly: true,
-		}
-		http.SetCookie(w, cookie)
-		fmt.Println(cookie.Name)
-		http.Redirect(w, r, "http://localhost:3000/login", http.StatusTemporaryRedirect)
+	cookie := http.Cookie{
+		Name:     "insomnia",
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour),
+		HttpOnly: false,
+		Path:     "/",
 	}
+	http.SetCookie(w, &cookie)
+	fmt.Println(cookie.Name)
+	http.Redirect(w, r, "http://localhost:3000/login", http.StatusTemporaryRedirect)
 }
 
 /*

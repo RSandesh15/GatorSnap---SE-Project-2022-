@@ -43,6 +43,7 @@ func fetchCartRecords(DB *gorm.DB, w http.ResponseWriter, buyerEmailId string) (
 		SendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return nil, err
 	}
+
 	var allProductImages []models.ProductCatalogue
 	defer rows.Close()
 	var cartInfo models.Cart
