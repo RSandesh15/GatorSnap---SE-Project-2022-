@@ -75,7 +75,7 @@ func (a *App) migrateSchemas() {
 }
 
 func (a *App) RunApplication(port string) {
-	log.Fatal(http.ListenAndServe(port, a.Router))
+	// log.Fatal(http.ListenAndServe(port, a.Router))
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
 		AllowCredentials: true,

@@ -23,6 +23,9 @@ import (
 func FetchCartInfo(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	// TODO: Check if the user is authorized to add to the table or not by comparing the buyerEmailId
 	// and the email id from the token received
+
+	// Decode Cookie  -> email
+
 	params := mux.Vars(r)
 	buyerEmailId := params["buyerEmailId"]
 	allCartProducts, err := fetchCartRecords(DB, w, buyerEmailId)
