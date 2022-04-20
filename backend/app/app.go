@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -75,6 +76,12 @@ func (a *App) migrateSchemas() {
 
 func (a *App) RunApplication(port string) {
 	log.Fatal(http.ListenAndServe(port, a.Router))
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowCredentials: true,
+	})
+	handler := c.Handler(a.Router)
+	log.Fatal(http.ListenAndServe(port, handler))
 }
 
 func (a *App) setRouters() {
