@@ -45,7 +45,7 @@ export default function Review() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:8085/fetchCartInfo/vedulaprashant2209@gmail.com`)
+      .get(`http://localhost:8085/fetchCartInfo`)
       .then((response) => {
         setFetchedCartData(response.data.data);
         console.log(response.data.data);
