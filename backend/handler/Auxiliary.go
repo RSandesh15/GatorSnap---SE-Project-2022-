@@ -23,16 +23,28 @@ import (
 func FetchCartInfo(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	// TODO: Check if the user is authorized to add to the table or not by comparing the buyerEmailId
 	// and the email id from the token received
-	
-	params := mux.Vars(r)
-	buyerEmailId := params["buyerEmailId"]
+
+	// Decode Cookie  -> email
+
+	//	params := mux.Vars(r)
+	//buyerEmailId := params["buyerEmailId"]
+
+	cookie, err := r.Cookie("insomnia")
+	if err != nil {
+		// SendErrorResponse()
+	}
+	ids, err := ValidateToken(cookie.String())
+	if err != nil {
+		// SendErrorResponse()
+	}
+	println("Email id from cookie: ", ids.Email)
+	buyerEmailId := ids.Email
 	allCartProducts, err := fetchCartRecords(DB, w, buyerEmailId)
 	if err != nil {
 		return
 	}
 	SendJSONResponse(w, http.StatusOK, allCartProducts)
 }
-
 func fetchCartRecords(DB *gorm.DB, w http.ResponseWriter, buyerEmailId string) ([]models.ProductCatalogue, error) {
 	var buyerCartProducts models.Cart
 	allBuyerCartProducts := DB.Where(&models.Cart{BuyerEmailId: buyerEmailId}).Find(&buyerCartProducts)
