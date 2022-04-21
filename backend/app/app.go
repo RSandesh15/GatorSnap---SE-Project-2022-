@@ -90,7 +90,7 @@ func (a *App) setRouters() {
 	a.Router.HandleFunc("/fetchGenreCategories", a.getGenreCategories).Methods("GET")
 	a.Router.HandleFunc("/uploadSellerImage", a.uploadSellerImage).Methods("POST")
 	a.Router.HandleFunc("/fetchProductInfo/{imageId}", a.getProductInfo).Methods("GET")
-	a.Router.HandleFunc("/fetchCartInfo/{buyerEmailId}", a.fetchCartInfo).Methods("GET")
+	a.Router.HandleFunc("/fetchCartInfo", a.fetchCartInfo).Methods("GET")
 	a.Router.HandleFunc("/addToCart", a.addToCart).Methods("POST")
 	a.Router.HandleFunc("/deleteFromCart", a.deleteFromCart).Methods("POST")
 	a.Router.HandleFunc("/checkoutAndProcessPayment", a.checkoutAndProcessPayment).Methods("POST")

@@ -26,8 +26,18 @@ func FetchCartInfo(DB *gorm.DB, w http.ResponseWriter, r *http.Request) {
 
 	// Decode Cookie  -> email
 
-	params := mux.Vars(r)
-	buyerEmailId := params["buyerEmailId"]
+	//	params := mux.Vars(r)
+	//buyerEmailId := params["buyerEmailId"]
+	cookie, err := r.Cookie("insomnia")
+	if err != nil {
+		// SendErrorResponse()
+	}
+	ids, err := ValidateToken(cookie.String())
+	if err != nil {
+		// SendErrorResponse()
+	}
+	println("Email id from cookie: ", ids.Email)
+	buyerEmailId := ids.Email
 	allCartProducts, err := fetchCartRecords(DB, w, buyerEmailId)
 	if err != nil {
 		return
