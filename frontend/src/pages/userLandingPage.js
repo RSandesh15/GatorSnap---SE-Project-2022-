@@ -14,7 +14,7 @@ import AddIcon from "@material-ui/icons/Add";
 import RemoveIcon from "@material-ui/icons/Remove";
 import "../App1.css";
 import BasicModal from "../Components/BasicModal";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 //Bootstrap
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -30,7 +30,6 @@ function srcset(image, width, height, rows = 1, cols = 1) {
 }
 
 export default function UserLandingPage() {
-    
   // constructor(props) {
   //     super(props);
   //     this.state = { email: "jim@ufl.edu", id:"", authflag:1 };
@@ -50,7 +49,7 @@ export default function UserLandingPage() {
         "Content-type": "application/json",
       },
       body: JSON.stringify({
-        buyerEmailId: "mehuljhaver@ufl.edu",
+        buyerEmailId: "vedulaprashant2209@gmail.com",
         imageId: imageID,
       }),
     });
@@ -66,15 +65,25 @@ export default function UserLandingPage() {
       headers: {
         Accept: "application/json",
         "Content-type": "application/json",
-        "Access-Control-Allow-Origin" : "*"
+        "Access-Control-Allow-Origin": "*",
       },
       body: JSON.stringify({
-        buyerEmailId: "mehuljhaver@ufl.edu",
+        buyerEmailId: "vedulaprashant2209@gmail.com",
         imageId: imageID,
       }),
     });
 
     setItemCount(Math.max(itemCount - 1, 0));
+  };
+  const handleLogout = (e) => {
+    fetch(`http://localhost:8085/logout`, {
+      mode: "no-cors",
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-type": "application/json",
+      },
+    });
   };
   //   handleChange(event) {
   //     this.setState({ email: event.state.email, id: event.state.id });
@@ -83,14 +92,12 @@ export default function UserLandingPage() {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
- 
+
   const [fetchImages, setFetchedImageData] = useState([]);
   const obj = Object.entries(fetchImages);
 
   useEffect(() => {
-
     axios.get("http://localhost:8085/fetchImages").then((response) => {
-      
       setFetchedImageData(response.data.data);
     });
   }, []);
@@ -211,16 +218,25 @@ export default function UserLandingPage() {
               >
                 <i class="fa fa-fw fa-search text-dark mr-2"></i>
               </a>
+              
               <Badge color="secondary" badgeContent={itemCount}>
-                
-                  
-                  <button>
-                  <Link to = '/Checkout'>
-                  <ShoppingCartIcon />
-                      </Link>
-                  </button>
-                
+                <button style={{ height: "50px", width: "70px" }}>
+                  <Link to="/Checkout">
+                    <ShoppingCartIcon />
+                  </Link>
+                </button>
               </Badge>
+              
+              <Button
+                onClick={handleLogout}
+                style={{ height: "50px", width: "70px" }}
+                variant="contained"
+                color="secondary"
+                className="button-block"
+              >
+                Logout
+              </Button>
+              
             </div>
           </div>
         </div>
@@ -289,8 +305,9 @@ export default function UserLandingPage() {
                 <ImageListItem key={item.wImageUrl} cols={cols} rows={rows}>
                   <img
                     //{...srcset(item.wImageUrl, 125, 100, rows, cols)}
-                    src = {item.wImageUrl}
-                    width = "500" height = "500"
+                    src={item.wImageUrl}
+                    width="500"
+                    height="500"
                     alt={item.title}
                     loading="lazy"
                   />
