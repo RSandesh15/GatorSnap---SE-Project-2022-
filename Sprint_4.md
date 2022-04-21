@@ -14,7 +14,8 @@ A web application for UF students to upload their artwork/photographs for potent
 We can think about scaling our application using noSQL databases such as mongoDB to attract more userbase. We can also integrate new payment methods by taking advantage of blockchain technology and deploying each image on the blockcahin with a smart contract to act as an nft. We can deploy this website for students and take their review as part of our beta testing phase.
 
 ### Demo video
-<img src='Gifs/Demo.gif' title='Demo' width='' />
+
+https://user-images.githubusercontent.com/93216515/164368572-b8ed818e-e7e1-4509-ae06-25dd1bb46f5b.mp4
 
 ### Backend Testing video
 <img src='Gifs/backend_testing.gif' title='Demo' width='' />
