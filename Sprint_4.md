@@ -21,6 +21,12 @@ https://user-images.githubusercontent.com/93216515/164368572-b8ed818e-e7e1-4509-
 <img src='Gifs/backend_testing.gif' title='Demo' width='' />
 
 ### Cypress Testing video
+Conducted cypress tests on additional functionalities for multiple pages. This testing included - 1. Page redirection 2. Field authentication 3. Button responses 4. Field validation
+Create a new React project to get started. Optionally add TypeScript
+1. npm create react-app cypress-test-react --template typescript
+You also need @cypress/react, which is the primary way to mount and interact with components. 
+1. npm add cypress @cypress/react @cypress/webpack-dev-server --dev
+
 <img src='Gifs/cypress_testing.gif' title='Demo' width='' />
 
 ### Link to API Documentation
