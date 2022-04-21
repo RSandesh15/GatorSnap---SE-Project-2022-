@@ -102,8 +102,8 @@ export default function Checkout2() {
       body: JSON.stringify({
 
           token: "",
-          buyerEmailId: "mehuljhaver@ufl.edu",
-          paymentIntentId: "pi_3KqQeXE2RN3PJKON1PgoiGRH"
+          buyerEmailId: "vedulaprashant2209@gmail.com",
+          paymentIntentId: "pi_3KqnSiE2RN3PJKON1ktxj6pg"
       }),
     }).then(function (response) {
             console.log(response.data);
@@ -144,9 +144,7 @@ export default function Checkout2() {
                   Thank you for your order.
                 </Typography>
                 <Typography variant="subtitle1">
-                  Your order number is #2001539. We have emailed your order
-                  confirmation, and will send you an update when your order has
-                  shipped.
+                  Your order number is #2001539. We have emailed your order!
                 </Typography>
               </React.Fragment>
             ) : (

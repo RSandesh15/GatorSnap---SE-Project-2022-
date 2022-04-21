@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Back from "../Components/background.jpg";
 import {
   Button,
   TextField,
@@ -16,8 +17,7 @@ class Login extends React.Component {
     super(props);
     this.state = { username: "", password: "", authflag: 1 };
     this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleLogout = this.handleLogout.bind(this);
+    this.handleLogin = this.handleLogin.bind(this);
   }
   handleChange(event) {
     this.setState({
@@ -26,8 +26,7 @@ class Login extends React.Component {
     });
   }
 
- 
-  handleSubmit = (e) => {
+  handleLogin = (e) => {
    
     e.preventDefault();
     console.log("In submit")
@@ -36,20 +35,18 @@ class Login extends React.Component {
  }
   };
 
-  handleLogout = () => {
-    console.log("sad");
-   fetch(`http://localhost:8085/logout`, {
-     mode : "no-cors",
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      "Content-type": "application/json",
-    }
-   });
-  };
   render() {
     return (
-      <div>
+      <div
+        style={{
+          backgroundImage: `url(${Back})`,
+          height: "100vh",
+          marginTop: "30px",
+          fontSize: "50px",
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
         <AppBar position="static" alignitems="center" color="primary">
           <Toolbar>
             <Grid container justify="center" wrap="wrap">
@@ -63,8 +60,9 @@ class Login extends React.Component {
         <br />
 
         <center>
-          <Typography variant="h6">Buyers</Typography>
+          <Typography variant="h4">Buyers</Typography>
         </center>
+        <br />
         <Grid container spacing={-5} justify="center" direction="row">
           <Grid item>
             <Grid
@@ -80,12 +78,12 @@ class Login extends React.Component {
                 className="login-background"
               >
                 <Grid item>
-                  <Typography component="h1" variant="h5">
+                  <Typography component="h1" variant="h5" align="center">
                     Sign in
                   </Typography>
                 </Grid>
                 <Grid item>
-                  <form onSubmit={this.handleSubmit}>
+                  <form onSubmit={this.handleSubmit}> 
                     <Grid container direction="column" spacing={2}>
                       <Grid item>
                         <TextField
@@ -124,16 +122,37 @@ class Login extends React.Component {
                         <Button
                           variant="contained"
                           color="primary"
-                          type="submit"
+                          
                           className="button-block"
                         >
                           Submit
                         </Button>
-                        <Button onClick={this.handleLogout}>Logout</Button>
                       </Grid>
                     </Grid>
+                    
                   </form>
+                  <br/>
+                  <Typography component="h4" variant="h9" align="center">
+                      OR
+                    </Typography>
+                    <br />
+                    <Typography component="h1" variant="h5" align="center">
+                      Sign In With Google
+                    </Typography>
+                    <br />
+                    <Button
+                      onClick = {this.handleLogin}
+                      variant="contained"
+                      color="primary"
+                      className="button-block"
+                    >
+                      Google Sign In
+                    </Button>
+                    <Grid>
+                      <br />
+                    </Grid>
                 </Grid>
+                <br />
 
                 <Grid>
                   <Link to="/SignUp">Forgot Password?</Link>
