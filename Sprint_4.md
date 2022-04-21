@@ -58,5 +58,6 @@ We have developed the following set of APIs for Sprint 4:
 - Imported the cookie and used it for all the API calls.
 - Integration of Stripe (Bypassing CORS policy), using stripe created paymentIntentID. Used this stripe created paymentIntentID for enhancing security on the payment portal which is STRIPE.
 - Calling the emailProduct API and succefully sending email to the registered user.
+- Created more test cases for every webpage to validate functionality.
 
 ## Thank You!! Hope you enjoyed our project idea and implemetation.
